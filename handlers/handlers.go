@@ -4,31 +4,53 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/andeeliao/basics"
-	"github.com/andeeliao/table"
+	"github.com/andeeliao/structs"
+	"github.com/andeeliao/deltas"
 	"io"
-	"io/ioutil"
+	//"io/ioutil"
+	"strings"
 	"encoding/json"
 )
 
 const URL = "http://localhost:8080"
 
-var Tables_list []table.Table
+var Tables_list []structs.Table
 
 func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 
-	fmt.Println("got request 1")
+	fmt.Println("got request from review 1")
+	
+
 	switch r.Method {
 	case "POST":
-		body, err := ioutil.ReadAll(r.Body)
+		fmt.Println("got POST request from ReviewsHandler")
+		
+
+		var kvpair structs.KeyValuePair
+
+		decoder := json.NewDecoder(r.Body)
+		decoder.Decode(&kvpair)
+
+		fmt.Println("json: ")
+		basics.PrintJSON(kvpair)
+		fmt.Println(deltas.Map(kvpair))
+
+		details := "/sor/1/" + kvpair.Table + "/" + kvpair.TableKey + "?audit=comment:'moderation+complete',host:aws-cms-01"
+		resp, err := http.Post(URL + details, "application/x.json-delta", strings.NewReader(deltas.Map(kvpair)))
 		basics.Check(err)
 
-		fmt.Println(string(body))
 
+		var success structs.SuccessResponse
+		decoder2 := json.NewDecoder(resp.Body)
+		decoder2.Decode(&success)
+
+		fmt.Println(success)
+		//need to go back and send this to client so it knows success status
+		/*io.Copy(w, resp.Body)*/
 
 	case "GET":
-
-		fmt.Println("got request 2")
-		resp, err := http.Get(URL + "/sor/1/review:testcustomer/demo1")
+		tableName := r.URL.Query().Get("tableName")
+		resp, err := http.Get(URL + "/sor/1/" + tableName)
 		basics.Check(err)
 
 		defer resp.Body.Close()
@@ -63,12 +85,11 @@ func TablesListHandler(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(resp.Body)
 		decoder.Decode(&Tables_list)
 
-		fmt.Println(Tables_list)
+		//fmt.Println(Tables_list)
+
+		//basics.PrintJSON(Tables_list)
 
 		encoded, err := json.Marshal(Tables_list)
-		basics.Check(err)
-		fmt.Println(string(encoded))
-
 		w.Write(encoded)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)

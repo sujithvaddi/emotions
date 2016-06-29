@@ -3,6 +3,11 @@
   <head>
     <meta charset="utf-8">
     <title>demo demo demo</title>
+    <!-- jQuery, jQuery.ui -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
+
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
@@ -11,32 +16,35 @@
     <script src="https://fb.me/react-15.1.0.js"></script>
     <script src="https://fb.me/react-dom-15.1.0.js"></script>
 
-    <!-- jQuery, jQuery.ui -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
     
   
-    <div class="container-fluid">
-  
+    <div class="container">
+      <div id="content4">
+        <form >New Field:<br>
+        <input type="text" name="field"  id="newField"><br>New Field Value:<br>
+        <input type="text" name="lastname" id="newFieldValue"><br><br>
+        <button id="submit-new" type="button">Add field</button>
+        </form>
+      </div>
+      <div id="content"></div>
       <div id="content2"></div>
-  <form >
-  New Field:<br>
-  <input type="text" name="field"  id="newField"><br>
-  New Field Value:<br>
-  <input type="text" name="lastname" id="newFieldValue"><br><br>
-  <button id="submit-new">Add field</button>
-  </form>
+        
     
       <div id="content3"></div>
-      <div id="content4"></div>
-      <div id="content">
+
+
     </div>
+
+<div class="main">
+<!-- Content Here -->
+</div>
+
     <script type="text/babel" src="main.js"> </script>
     <script type="text/babel">
+
 
     </script>
   </body>
