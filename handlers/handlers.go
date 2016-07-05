@@ -35,18 +35,24 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 		basics.PrintJSON(kvpair)
 		fmt.Println(deltas.Map(kvpair))
 
-		details := "/sor/1/" + kvpair.Table + "/" + kvpair.TableKey + "?audit=comment:'moderation+complete',host:aws-cms-01"
+		//writes to emodb, should be conditional, or maybe move other stuff to outside of ReviewsHandler
+		/*details := "/sor/1/" + kvpair.Table + "/" + kvpair.TableKey + "?audit=comment:'moderation+complete',host:aws-cms-01"
 		resp, err := http.Post(URL + details, "application/x.json-delta", strings.NewReader(deltas.Map(kvpair)))
 		basics.Check(err)
-
 
 		var success structs.SuccessResponse
 		decoder2 := json.NewDecoder(resp.Body)
 		decoder2.Decode(&success)
 
-		fmt.Println(success)
+		fmt.Println(success)*/
 		//need to go back and send this to client so it knows success status
-		/*io.Copy(w, resp.Body)*/
+
+
+		w.Header().Set("Content-Type", "text/plain")
+		io.Copy(w, strings.NewReader(deltas.Map(kvpair)))
+
+		
+
 
 	case "GET":
 		tableName := r.URL.Query().Get("tableName")
@@ -72,6 +78,8 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 func TablesListHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
+
+		fmt.Println("got POST request from TablesListHandler")
 		resp, err := http.Get(URL + "/sor/1/_table")
 		basics.Check(err)
 

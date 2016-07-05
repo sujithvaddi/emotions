@@ -19,18 +19,14 @@ $(function () {
 					+ '</button><br>');
 			}
 			$('.load-table').on('click', function() {
-			var table = $(this).attr('table-id');
-			//console.log(table);
-			getReviews(table);
-	});
+				var table = $(this).attr('table-id');
+				getReviews(table);
+			});
 		},
 		error: function (error) {
 			alert ('error with tables:', error);
 		}
 	});
-
-
-	//getReviews("testtable2");
 
 	$('#submit-new').on('click', function() {
 		var postData = {
@@ -48,9 +44,34 @@ $(function () {
 			data: json_data,
 			success: function (data) {
 				//do stuff
+			},
+			error: function(err) {
+				alert('error on submit-new');
 			}
 		});
+	});
 
+	$('#makeMapDelta').on('click', function() {
+		var text = $('textarea#editValue').val();
+		var textArr = text.split(': ')
+		var postData = {
+			"key": textArr[0],
+			"value": textArr[1],
+			"type": "map",
+			"submit": false,
+			"table": "review:testcustomer",
+			"tableKey": "demo1"
+		};
+		console.log(postData);
+		var json_data = JSON.stringify(postData);
+		$.ajax({
+			type: 'POST',
+			url: '/reviews',
+			data: json_data,
+			success: function (data) {
+				$('textarea#editValue').val(data);
+			}
+		});
 	});
 });
 
@@ -67,12 +88,24 @@ function getReviews(table) {
 			for(var i = 0; i < reviews.length; i++) {
 				var review = reviews[i];
 				$reviews.append('<h2>review</h2>');
+				//console.log(review)
+				$reviews.append('<pre><code>' + JSON.stringify(review, null, 4) + '/<code></pre>')
+				//console.log(JSON.stringify(review, null, 4));
 				for (var key in review) {
-							$reviews.append('<p>' + key + '    : ' + review[key] + '</p>');
-							$reviews.append('<form name="demoform" onsubmit="" method="post"> Edit: <input type="text" name="edit"  value="' 
-								+ review[key] +'"><button type="button" value="Submit">Edit</button></form>');
-						};
-					}
+					$reviews.append(
+						'<button class="edit-field" type="button" value="Submit">' + key + ': ' 
+						+ review[key] + '</button></p>');
+
+					/*$reviews.append('<form name="demoform" onsubmit="" method="post">Edit:<input type="text" name="edit"  value="' 
+						+ review[key] +'"><button class="edit-field" type="button" value="Submit">Edit</button></form>');*/
+				};
+			}
+
+			$('.edit-field').on('click', function () {
+				$('textarea#editValue').val($(this).text());
+			})
+
+			
 		},
 		error: function (error) {
 			alert('error with getting reviews!');
