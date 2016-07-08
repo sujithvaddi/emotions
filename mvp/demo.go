@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/andeeliao/handlers"
-		//"encoding/json"
+	//"encoding/json"
 	//"io"
 	//"os"
 	//"bufio"
-		//"log"
+	//"log"
 	//"io/ioutil"
 	//"bytes"
 )
@@ -18,7 +18,9 @@ func main() {
 
 	http.HandleFunc("/tables", handlers.TablesListHandler)
 	http.HandleFunc("/reviews", handlers.ReviewsHandler)
-	fmt.Println("got request 1")
+	http.HandleFunc("/deltaconstructor", handlers.DeltaConstructorHandler)
+	http.HandleFunc("/deltatest", handlers.DeltaTestHandler)
+	fmt.Println("got to 1")
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 	http.ListenAndServe(":8001", nil)
 

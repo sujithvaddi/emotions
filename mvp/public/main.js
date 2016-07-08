@@ -1,4 +1,6 @@
-$(function () {
+$(function() {
+
+	$('[data-toggle="tooltip"]').tooltip();
 	
 	var $tables = $('#content4');
 	var $newField = $('#newField');
@@ -9,17 +11,18 @@ $(function () {
 		url: '/tables',
 		success: function(tables) {
 			$tables.append('<h1>tables</h1>');
-			//console.log(tables);
+			console.log(tables);
 			for(var i = 0; i < tables.length; i++) {
 				$tables.append('<button id="' + tables[i]['Name'] 
 					+ '"type="button" class="load-table" table-id="'
 					+ tables[i]['Name'] 
 					+'">' 
 					+ tables[i]['Name'] 
-					+ '</button><br>');
+					+ '</button>');
 			}
 			$('.load-table').on('click', function() {
 				var table = $(this).attr('table-id');
+				$('#current-table').val(table)
 				getReviews(table);
 			});
 		},
@@ -28,7 +31,7 @@ $(function () {
 		}
 	});
 
-	$('#submit-new').on('click', function() {
+	/*$('#submit-new').on('click', function() {
 		var postData = {
 			"key": $newField.val(),
 			"value": $newFieldVal.val(),
@@ -49,69 +52,220 @@ $(function () {
 				alert('error on submit-new');
 			}
 		});
-	});
+	});*/
 
-	$('#makeMapDelta').on('click', function() {
-		var text = $('textarea#editValue').val();
+	$('.make-delta').on('click', function() {
+		var text = $('textarea#edit-value').val();
 		var textArr = text.split(': ')
+		var deltaType = $(this).text();
 		var postData = {
 			"key": textArr[0],
 			"value": textArr[1],
-			"type": "map",
-			"submit": false,
-			"table": "review:testcustomer",
-			"tableKey": "demo1"
+			"type": deltaType
+		};
+		var json_data = JSON.stringify(postData);
+		$.ajax({
+			type: 'POST',
+			url: '/deltaconstructor',
+			data: json_data,
+			success: function(data) {
+				$('#edit-value').val(data);
+			}
+		});
+	});
+
+	$('.edit-selected').on('click', function() {
+		var text = $('textarea#edit-value').selection();
+		if (text=="") {
+			text = $('textarea#edit-value').val();
+			$('textarea#edit-value').val("");
+		};
+		var deltaType = $(this).text();
+		var postData = {
+			"value": text,
+			"type": deltaType
 		};
 		console.log(postData);
 		var json_data = JSON.stringify(postData);
 		$.ajax({
 			type: 'POST',
-			url: '/reviews',
+			url: '/deltaconstructor',
 			data: json_data,
-			success: function (data) {
-				$('textarea#editValue').val(data);
+			success: function(data) {
+				$('#edit-value').selection('replace', {text: data});
 			}
 		});
+	});
+
+	$('#test-result').on('click', function() {
+		var delta = $('#edit-value').val();
+		var jsonStr = $("#" + $('#current-key').val()).text();
+		var data = {
+			"delta": delta,
+			"original": jsonStr
+		};
+		var json = JSON.stringify(data)
+		$.ajax({
+			type: 'POST',
+			url: '/deltatest',
+			data: json,
+			success: function(data) {
+				$('#test-delta-result').empty().append('<h2>Results: </h2>' 
+					+ '<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
+			},
+			error: function(err) {
+				alert("error with test send");
+			}
+		});
+	});
+
+	$('#send-delta').on('click', function() {
+		var delta = $('#edit-value').val();
+		var table = $('#current-table').val();
+		var tableKey = $('#current-key').val();
+		var data = {
+			"delta": delta,
+			"table": table,
+			"tableKey": tableKey
+		}
+		var json = JSON.stringify(data);
+		$.ajax({
+			type: "POST",
+			url: "/reviews",
+			data: json,
+			success: function(data) {
+				//stuff
+			}
+		})
 	});
 });
 
 function getReviews(table) {
 	//console.log("inside getReviews", table)
 	var $reviews = $('#content2');
+	$reviews.empty();
+	$('#current-key').val("select a document to edit");
 	$.ajax({
 		type: 'GET',
 		url: '/reviews',
 		data: {tableName: table},
 		success: function(reviews) {
-			$reviews.append('<h1>reviews</h1>');
+			$reviews.append('<h1>documents</h1>');
 			//console.log(reviews);
 			for(var i = 0; i < reviews.length; i++) {
 				var review = reviews[i];
-				$reviews.append('<h2>review</h2>');
+				$reviews.append('<h2>document</h2><button class="edit-review" type="button"> Edit: ' + review["~id"] + '</button>');
 				//console.log(review)
-				$reviews.append('<pre><code>' + JSON.stringify(review, null, 4) + '/<code></pre>')
+				$reviews.append('<pre><code id="' + review["~id"] + '">' + JSON.stringify(review, null, 4) + '</code></pre>');
 				//console.log(JSON.stringify(review, null, 4));
-				for (var key in review) {
-					$reviews.append(
-						'<button class="edit-field" type="button" value="Submit">' + key + ': ' 
-						+ review[key] + '</button></p>');
-
-					/*$reviews.append('<form name="demoform" onsubmit="" method="post">Edit:<input type="text" name="edit"  value="' 
-						+ review[key] +'"><button class="edit-field" type="button" value="Submit">Edit</button></form>');*/
-				};
 			}
-
-			$('.edit-field').on('click', function () {
-				$('textarea#editValue').val($(this).text());
-			})
-
-			
+			$('.edit-review').on('click', function () {
+				var text = $(this).text();
+				var textArr = text.split(': ');
+				var docName = textArr[1];
+				$('#current-key').val(docName);
+				editReview(docName);
+			});		
 		},
 		error: function (error) {
 			alert('error with getting reviews!');
 		}
 	});
 }
+
+function editReview(doc) {
+	var $buttons = $('#document-edits');
+	var jsonStr = $("#" + doc).text();
+	var obj = $.parseJSON(jsonStr);
+	for (var key in obj) {
+		$buttons.append(
+			'<button class="edit-field" type="button" value="Submit">' + key + ': ' 
+			+ obj[key] + '</button>');
+	};
+	$('.edit-field').on('click', function () {
+		$('textarea#edit-value').val($(this).text());
+	});
+}
+
+
+var DeltaButton = React.createClass({
+	getDeltaFormat: function() {
+		var text = $('textarea#edit-value').val();
+		var textArr = text.split(': ')
+		var deltaType = $(this).text();
+		var postData = {
+			"key": textArr[0],
+			"value": textArr[1],
+			"type": deltaType
+		};
+		var json_data = JSON.stringify(postData);
+		$.ajax({
+			type: 'POST',
+			url: '/deltaconstructor',
+			data: json_data,
+			success: function(data) {
+				$('#edit-value').val(data);
+			},
+			error: function(data) {
+				console.log("something went wrong with ajax from DeltaButton");
+			}
+		});
+	},
+	render: function() {
+		return (
+			<button className="btn btn-default make-delta" type="button" data-toggle="tooltip" title={this.props.tooltipText} data-html="true"
+         		>{this.props.buttonText}</button>
+			);
+	}
+})
+
+var DeltaButtonList = React.createClass({
+	getInitialState: function() {
+		return {
+			data: [
+				{"title": "stuff <b>stuff</b>", "name": "Map"},
+				{"title": "stuff <b>stuff</b>", "name": "Literal"},
+				{"title": "stuff <b>stuff</b>", "name": "Delete Document"},
+				{"title": "stuff <b>stuff</b>", "name": "Delete Key"},
+				{"title": "stuff <b>stuff</b>", "name": "Nest"}
+			]
+		}
+	},
+	componentDidMount: function() {
+		$('[data-toggle="tooltip"]').tooltip();
+		$('.make-delta').on('click', function() {
+			var text = $('textarea#edit-value').val();
+			var textArr = text.split(': ')
+			var deltaType = $(this).text();
+			var postData = {
+				"key": textArr[0],
+				"value": textArr[1],
+				"type": deltaType
+			};
+			var json_data = JSON.stringify(postData);
+			$.ajax({
+				type: 'POST',
+				url: '/deltaconstructor',
+				data: json_data,
+				success: function(data) {
+					$('#edit-value').val(data);
+				}
+			});
+		});
+	},
+	render: function() {
+		var buttons = this.state.data.map(function(button) {
+			return (
+				<DeltaButton buttonText={button.name} key={button.name} tooltipText={button.title} />
+				);
+		});
+
+		return (<div>{buttons}</div>);
+	}
+})
+
+
+ReactDOM.render(<DeltaButtonList />, document.getElementById('delta-buttons'));
 
 /*var Review = React.createClass({
 	render: function() {

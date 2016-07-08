@@ -16,6 +16,8 @@
     <script src="https://fb.me/react-15.1.0.js"></script>
     <script src="https://fb.me/react-dom-15.1.0.js"></script>
 
+    <script src="jquery.selection.js"></script>
+
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
@@ -23,14 +25,32 @@
   
     <div class="container">
       <div id="content4">
-      </div><div id="content5">
-        <form >Edit value:<br>
-        <textarea type="text" name="lastname" id="editValue" style="width: 300px; height: 150px"></textarea><br><br>
-        <button id="makeMapDelta" type="button">Map Delta</button><br>
-        <button id="sendDelta" type="button">Send Update</button>
+      </div>
+      <div id="content5">
+        Current Table: <input id="current-table" type="text" value="select a table to edit"readonly="readonly">
+        Current Key: <input id="current-key" value="select a document to edit" readonly="readonly"><br>
+        Edit fields: 
+        <div id="document-edits"></div>
+        <form>Editable value:<br>
+        <textarea id="edit-value" type="text" name="lastname" style="width: 300px; height: 100px"></textarea><br><br>
+        Deltas: <div id="delta-buttons"></div>
+         <br>
+         Conditionals:
+         <button class="edit-selected" type="button">Make Conditional</button>
+         <button class="edit-selected" type="button">Noop</button>
+         <button class="edit-selected" type="button">True</button>
+         <button class="edit-selected" type="button">False</button>
+
+         <!-- <button class="make-delta" type="button">Conditional Delta</button> -->
+        <br>
+        Options:
+        <button id="test-result" type="button">See Test Result</button>
+        <button id="send-delta" type="button">Send Update</button>
+        <br>
+        *Hover to see usage and example
         </form>
       </div>
-      <div id="content"></div>
+      <div id="test-delta-result"></div>
       <div id="content2"></div>
         
     
@@ -44,9 +64,6 @@
 </div>
 
     <script type="text/babel" src="main.js"> </script>
-    <script type="text/babel">
-
-
-    </script>
+    
   </body>
 </html>
