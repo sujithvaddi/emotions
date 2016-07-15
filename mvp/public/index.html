@@ -6,64 +6,51 @@
     <!-- jQuery, jQuery.ui -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
 
     <!-- Bootstrap -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- React -->
-    <script src="https://fb.me/react-15.1.0.js"></script>
-    <script src="https://fb.me/react-dom-15.1.0.js"></script>
 
     <script src="jquery.selection.js"></script>
 
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
-    
-  
-    <div class="container">
-      <div id="content4">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2">
+          <div id="content4">
+            <h1>tables</h1>
+          </div>
+          <div id="search-bar"></div>
+        </div>
+        <div class="col-md-10">
+          <div id="content5">
+            Current Table: <input id="current-table" type="text" value="select a table to edit"readonly="readonly">
+            Current Key: <input id="current-key" value="select a document to edit" readonly="readonly"><br>
+            Edit fields: 
+            <div id="document-edits"></div>
+            <form>Editable value:<br>
+            <textarea id="edit-value" type="text" name="lastname" style="width: 300px; height: 100px"></textarea><br><br>
+            Deltas: <div id="delta-buttons"></div>
+             <br>
+             Conditionals: <div id="conditional-buttons"></div>
+            <br>
+            Options:
+            <button id="test-result" type="button">See Test Result</button>
+            <button id="send-delta" type="button">Send Update</button>
+            <br>
+            *Hover to see usage and example. <b>Bolded</b> text means text has been selected
+            </form>
+          </div>
+          <div id="test-delta-result"></div>
+          <div id="content2"></div>
+          <div id="content3"></div>
+        </div>
       </div>
-      <div id="content5">
-        Current Table: <input id="current-table" type="text" value="select a table to edit"readonly="readonly">
-        Current Key: <input id="current-key" value="select a document to edit" readonly="readonly"><br>
-        Edit fields: 
-        <div id="document-edits"></div>
-        <form>Editable value:<br>
-        <textarea id="edit-value" type="text" name="lastname" style="width: 300px; height: 100px"></textarea><br><br>
-        Deltas: <div id="delta-buttons"></div>
-         <br>
-         Conditionals:
-         <button class="edit-selected" type="button">Make Conditional</button>
-         <button class="edit-selected" type="button">Noop</button>
-         <button class="edit-selected" type="button">True</button>
-         <button class="edit-selected" type="button">False</button>
-
-         <!-- <button class="make-delta" type="button">Conditional Delta</button> -->
-        <br>
-        Options:
-        <button id="test-result" type="button">See Test Result</button>
-        <button id="send-delta" type="button">Send Update</button>
-        <br>
-        *Hover to see usage and example
-        </form>
-      </div>
-      <div id="test-delta-result"></div>
-      <div id="content2"></div>
-        
-    
-      <div id="content3"></div>
-
-
-    </div>
-
-<div class="main">
-<!-- Content Here -->
-</div>
-
-    <script type="text/babel" src="main.js"> </script>
-    
+    </div>  
+    <script type="text/babel" src="bundle.js"> </script>
   </body>
 </html>

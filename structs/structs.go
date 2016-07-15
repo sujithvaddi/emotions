@@ -1,12 +1,15 @@
 package structs
 
+import (
+	//"fmt"
+	"github.com/tchap/go-patricia/patricia"
+)
+
 type Table struct {
 	Name 	string 	`json: "name"`
-	//possible to add: availability, placement, facade	
 }
 
-type KeyValuePair struct {
-	Key 		string 	`json: "key"`
+type DeltaConstructorData struct {
 	Value 		string 	`json: "value"`
 	Type 		string 	`json: "type"`
 }
@@ -25,3 +28,13 @@ type DeltaEdit struct {
 	Table 		string 	`json: "table"`
 	TableKey 	string 	`json: "tableKey"`
 }
+
+type SearchResult struct {
+	Result []string `json: "result"`
+}
+
+func (sr *SearchResult) AppendTo(prefix patricia.Prefix, item patricia.Item) error {
+	(*sr).Result = append((*sr).Result, item.(string))
+	return nil
+}
+

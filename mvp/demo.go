@@ -4,18 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/andeeliao/handlers"
-	//"encoding/json"
-	//"io"
-	//"os"
-	//"bufio"
-	//"log"
-	//"io/ioutil"
-	//"bytes"
+	"github.com/andeeliao/cache"
 )
 
 
 func main() {
-
+	cache.Populate()
 	http.HandleFunc("/tables", handlers.TablesListHandler)
 	http.HandleFunc("/reviews", handlers.ReviewsHandler)
 	http.HandleFunc("/deltaconstructor", handlers.DeltaConstructorHandler)

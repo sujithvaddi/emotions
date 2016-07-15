@@ -6,6 +6,7 @@ import (
 	"github.com/andeeliao/basics"
 	"github.com/andeeliao/structs"
 	"github.com/andeeliao/deltas"
+	"github.com/andeeliao/cache"
 	"io"
 	//"io/ioutil"
 	"strings"
@@ -51,36 +52,37 @@ func DeltaConstructorHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		fmt.Println("inside DeltaConstructorHandler Post")
-		var kvpair structs.KeyValuePair
+		var data structs.DeltaConstructorData
 
 		decoder := json.NewDecoder(r.Body)
-		decoder.Decode(&kvpair)
+		decoder.Decode(&data)
+
+		fmt.Println(data)
 
 		var deltaString string
 
-		switch kvpair.Type {
+		switch data.Type {
 		case "Map":
-			deltaString = deltas.Map(kvpair)
+			deltaString = deltas.Map(data)
 		case "Literal":
-			deltaString = deltas.Literal(kvpair)
+			deltaString = deltas.Literal(data)
 		case "Delete Document":
-			deltaString = deltas.DeleteDoc(kvpair)
+			deltaString = deltas.DeleteDoc(data)
 		case "Delete Key":
-			deltaString = deltas.DeleteKey(kvpair)
+			deltaString = deltas.DeleteKey(data)
 		case "Noop":
-			deltaString = deltas.Noop(kvpair)
+			deltaString = deltas.Noop(data)
 		case "Nest":
-			deltaString = deltas.Nest(kvpair)
+			deltaString = deltas.Nest(data)
 		case "Make Conditional":
-			deltaString = deltas.MakeConditional(kvpair)
+			deltaString = deltas.MakeConditional(data)
 		case "True":
-			deltaString = deltas.AlwaysTrue(kvpair)
+			deltaString = deltas.AlwaysTrue(data)
 		case "False":
-			deltaString = deltas.AlwaysFalse(kvpair)
+			deltaString = deltas.AlwaysFalse(data)
 		default:
 			fmt.Println("unknown delta type")
 		}
-
 		w.Header().Set("Content-Type", "text/plain")
 		io.Copy(w, strings.NewReader(deltaString))
 	case "GET":
@@ -118,7 +120,7 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 
 
 		w.Header().Set("Content-Type", "text/plain")
-		//io.Copy(w, strings.NewReader(deltas.Map(kvpair)))
+		//io.Copy(w, strings.NewReader(deltas.Map(data)))
 
 	case "GET":
 		tableName := r.URL.Query().Get("tableName")
@@ -135,38 +137,35 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 		io.Copy(w, resp.Body)
 
 	default:
-		// Don't know the method, so error
 		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
 	}
-	//fmt.Println(data)
 }
 
 func TablesListHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-
-		fmt.Println("got POST request from TablesListHandler")
-		resp, err := http.Get(URL + "/sor/1/_table")
-		basics.Check(err)
-
-		defer resp.Body.Close()
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		// stream the contents of the file to the response
-		
-		var Tables_list []structs.Table
-		decoder := json.NewDecoder(resp.Body)
-		decoder.Decode(&Tables_list)
-
-		//fmt.Println(Tables_list)
+		fmt.Println("got GET request from TablesListHandler")
+		search := r.URL.Query().Get("query")
+		//fmt.Println(search)
 
 		//basics.PrintJSON(Tables_list)
 
-		encoded, err := json.Marshal(Tables_list)
+		w.Header().Set("Content-Type", "application/json")
+		encoded, err := json.Marshal(cache.Search(search))
+		basics.Check(err)
 		w.Write(encoded)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
