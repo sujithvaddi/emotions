@@ -26,18 +26,14 @@
           </div>
           <div id="search-bar"></div>
         </div>
-        <div class="col-md-10">
+        <div class="col-md-6">
           <div id="content5">
             Current Table: <input id="current-table" type="text" value="select a table to edit"readonly="readonly">
             Current Key: <input id="current-key" value="select a document to edit" readonly="readonly"><br>
             Edit fields: 
-            <div id="document-edits"></div>
+            <div id="document-edits" style="max-height:100px; overflow: auto"></div>
             <form>Editable value:<br>
-            <textarea id="edit-value" type="text" name="lastname" style="width: 300px; height: 100px"></textarea><br><br>
-            Deltas: <div id="delta-buttons"></div>
-             <br>
-             Conditionals: <div id="conditional-buttons"></div>
-            <br>
+            <textarea id="edit-value" type="text" name="lastname" style="width: 300px; max-height: 100px"></textarea>
             Options:
             <button id="test-result" type="button">See Test Result</button>
             <button id="send-delta" type="button">Send Update</button>
@@ -49,6 +45,10 @@
           <div id="content2"></div>
           <div id="content3"></div>
         </div>
+        <div class="col-md-4">
+          Deltas: <div id="delta-buttons"></div><br>
+          Conditionals: <div id="conditional-buttons"></div>
+        </div>  
       </div>
     </div>  
     <script type="text/babel" src="bundle.js"> </script>

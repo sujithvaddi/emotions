@@ -1,23 +1,20 @@
 package cache
 
 import (
-	"fmt"
+	//"fmt"
+	"net/http"
+	"encoding/json"
+
 	"github.com/tchap/go-patricia/patricia"
 	"github.com/andeeliao/structs"
 	"github.com/andeeliao/basics"
-	"net/http"
-	"encoding/json"
+	"github.com/jasonlvhit/gocron"
 )
 
 
-const URL = "http://localhost:8080"
+const URL = "https://emodb-ci.dev.us-east-1.nexus.bazaarvoice.com"
 
 var TableCache *patricia.Trie
-
-func printItem(prefix patricia.Prefix, item patricia.Item) error {
-    fmt.Printf("%q: %v\n", prefix, item)
-    return nil
-}
 
 func BuildTrie(tables []structs.Table) *patricia.Trie {	
 	trie := patricia.NewTrie()
@@ -30,21 +27,28 @@ func BuildTrie(tables []structs.Table) *patricia.Trie {
 func Search(prefix string) structs.SearchResult {
 	var results structs.SearchResult
 	TableCache.VisitSubtree(patricia.Prefix(prefix), results.AppendTo)
+	if len(results.Result) > 5 {
+		results.Result = results.Result[:5]
+	}
 	return results
 }
 
 func Populate() {
-	fmt.Println("Populating cache")
-	resp, err := http.Get(URL + "/sor/1/_table")
+	resp, err := http.Get(URL + "/sor/1/_table?limit=1000000000")
 	basics.Check(err)
-
 	defer resp.Body.Close()
 	
 	var Tables_list []structs.Table
 	decoder2 := json.NewDecoder(resp.Body)
 	decoder2.Decode(&Tables_list)
 
-	//fmt.Println(Tables_list)
-
 	TableCache = BuildTrie(Tables_list)
+}
+
+func Schedule() {
+	gocron.Every(1).Hour().Do(Populate)
+
+	go func() {
+		<- gocron.Start()
+	}()
 }

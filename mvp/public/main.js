@@ -58,10 +58,10 @@ function getReviews(table) {
 		url: '/reviews',
 		data: {tableName: table},
 		success: function(reviews) {
-			$reviews.append('<h1>documents</h1>');
+			$reviews.append('<h1>documents in:' + table + '</h1>');
 			for(var i = 0; i < reviews.length; i++) {
 				var review = reviews[i];
-				$reviews.append('<h2>document</h2><button class="edit-review" type="button"> Edit: ' + review["~id"] + '</button>');
+				$reviews.append('<button class="btn btn-default edit-review" type="button"> EDIT: ' + review["~id"] + '</button>');
 				$reviews.append('<pre><code id="' + review["~id"] + '">' + JSON.stringify(review, null, 4) + '</code></pre>');
 			}
 			$('.edit-review').on('click', function () {
@@ -84,9 +84,11 @@ function editReview(doc) {
 	var obj = $.parseJSON(jsonStr);
 	$buttons.empty();
 	for (var key in obj) {
-		$buttons.append(
-			'<button class="edit-field" type="button" value="Submit">' +  key + ':' 
-			+ obj[key] + '</button>');
+		if (key[0] != '~') {
+			$buttons.append(
+				'<button class="btn btn-default edit-field" type="button" value="Submit">' +  key + ':' 
+				+ obj[key] + '</button>');
+		};
 	};
 	$('.edit-field').on('click', function () {
 		var buttonText = $(this).text();
@@ -94,8 +96,6 @@ function editReview(doc) {
 		$('textarea#edit-value').val('{..,"' + textArr[0] + '":"' + textArr[1] + '"}');
 	});
 }
-
-
 
 var deltaButtons = [
 	{"name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}"},
@@ -111,7 +111,6 @@ var condtionalButtons = [
 	{"name": "True", "title": "replaces selected with delta true condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysTrue() then .. end"},
 	{"name": "False", "title": "replaces selected with delta false condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysFalse() then .. end"}
 ]
-
 
 var DeltaButton = React.createClass({
 	getDeltaFormat: function() {
@@ -186,11 +185,6 @@ var ButtonList = React.createClass({
 	}
 })
 
-
-ReactDOM.render(<ButtonList data={deltaButtons} />, document.getElementById('delta-buttons'));
-ReactDOM.render(<ButtonList data={condtionalButtons} />, document.getElementById('conditional-buttons'));
-
-
 const TablesSearchBar = React.createClass({
 	onChange: function(input, resolve) {
 		$.ajax({
@@ -205,19 +199,22 @@ const TablesSearchBar = React.createClass({
 			}
 		});
 	},
-	onSearch: function(input) {
-		$('#current-table').val(input)
-		getReviews(input);
+	onSubmit: function(input) {
+    	if (!input) return;
+		$('#current-table').val($('.search-bar-input').val());
+		getReviews($('.search-bar-input').val());
 	},
 	render() {
 		return (
 			<SearchBar
 			placeholder="search for a table"
 			onChange={this.onChange}
-			onSearch={this.onSearch} />
+			onSubmit={this.onSubmit} />
 			);
 	}
 });
 
-ReactDOM.render(<TablesSearchBar />, document.getElementById('search-bar'));
+ReactDOM.render(<ButtonList data={deltaButtons} />, document.getElementById('delta-buttons'));
+ReactDOM.render(<ButtonList data={condtionalButtons} />, document.getElementById('conditional-buttons'));
+ReactDOM.render(<TablesSearchBar throttle={1000} />, document.getElementById('search-bar'));
 

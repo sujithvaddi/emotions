@@ -10,6 +10,7 @@ import (
 
 func main() {
 	cache.Populate()
+	cache.Schedule()
 	http.HandleFunc("/tables", handlers.TablesListHandler)
 	http.HandleFunc("/reviews", handlers.ReviewsHandler)
 	http.HandleFunc("/deltaconstructor", handlers.DeltaConstructorHandler)

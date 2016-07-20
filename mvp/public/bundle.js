@@ -1071,10 +1071,10 @@ function getReviews(table) {
 		url: '/reviews',
 		data: { tableName: table },
 		success: function (reviews) {
-			$reviews.append('<h1>documents</h1>');
+			$reviews.append('<h1>documents in:' + table + '</h1>');
 			for (var i = 0; i < reviews.length; i++) {
 				var review = reviews[i];
-				$reviews.append('<h2>document</h2><button class="edit-review" type="button"> Edit: ' + review["~id"] + '</button>');
+				$reviews.append('<button class="btn btn-default edit-review" type="button"> EDIT: ' + review["~id"] + '</button>');
 				$reviews.append('<pre><code id="' + review["~id"] + '">' + JSON.stringify(review, null, 4) + '</code></pre>');
 			}
 			$('.edit-review').on('click', function () {
@@ -1097,7 +1097,9 @@ function editReview(doc) {
 	var obj = $.parseJSON(jsonStr);
 	$buttons.empty();
 	for (var key in obj) {
-		$buttons.append('<button class="edit-field" type="button" value="Submit">' + key + ':' + obj[key] + '</button>');
+		if (key[0] != '~') {
+			$buttons.append('<button class="btn btn-default edit-field" type="button" value="Submit">' + key + ':' + obj[key] + '</button>');
+		};
 	};
 	$('.edit-field').on('click', function () {
 		var buttonText = $(this).text();
@@ -1191,9 +1193,6 @@ var ButtonList = React.createClass({
 	}
 });
 
-ReactDOM.render(React.createElement(ButtonList, { data: deltaButtons }), document.getElementById('delta-buttons'));
-ReactDOM.render(React.createElement(ButtonList, { data: condtionalButtons }), document.getElementById('conditional-buttons'));
-
 const TablesSearchBar = React.createClass({
 	displayName: 'TablesSearchBar',
 
@@ -1210,19 +1209,22 @@ const TablesSearchBar = React.createClass({
 			}
 		});
 	},
-	onSearch: function (input) {
-		$('#current-table').val(input);
-		getReviews(input);
+	onSubmit: function (input) {
+		if (!input) return;
+		$('#current-table').val($('.search-bar-input').val());
+		getReviews($('.search-bar-input').val());
 	},
 	render() {
 		return React.createElement(SearchBar, {
 			placeholder: 'search for a table',
 			onChange: this.onChange,
-			onSearch: this.onSearch });
+			onSubmit: this.onSubmit });
 	}
 });
 
-ReactDOM.render(React.createElement(TablesSearchBar, null), document.getElementById('search-bar'));
+ReactDOM.render(React.createElement(ButtonList, { data: deltaButtons }), document.getElementById('delta-buttons'));
+ReactDOM.render(React.createElement(ButtonList, { data: condtionalButtons }), document.getElementById('conditional-buttons'));
+ReactDOM.render(React.createElement(TablesSearchBar, { throttle: 1000 }), document.getElementById('search-bar'));
 
 },{"react":176,"react-dom":31,"react-search-bar":32}],4:[function(require,module,exports){
 (function (process){
@@ -2570,6 +2572,7 @@ var _Suggestions = require('./Suggestions');
 var _Suggestions2 = _interopRequireDefault(_Suggestions);
 
 var KEY_CODES = {
+  enter: 13,
   up: 38,
   down: 40
 };
@@ -2692,6 +2695,9 @@ var SearchBar = _react2['default'].createClass({
           placeholder: this.props.placeholder,
           onChange: this.onChange,
           onKeyDown: function (e) {
+            if (e.which == KEY_CODES.enter) {
+              _this2.props.onSubmit(e) && _this2.onSubmit(e);
+            };
             (e.which == KEY_CODES.up || e.which == KEY_CODES.down) && _this2.state.suggestions.length != 0 && _this2.onKeyDown(e);
           },
           onBlur: function () {
@@ -2699,7 +2705,8 @@ var SearchBar = _react2['default'].createClass({
           },
           onFocus: function () {
             return _this2.setState({ isFocused: true });
-          } }),
+          } 
+        }),
         this.state.value && _react2['default'].createElement('span', {
           className: 'icon search-bar-cancel',
           onClick: function () {

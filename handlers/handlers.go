@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 )
 
-const URL = "http://localhost:8080"
+const URL = "https://emodb-ci.dev.us-east-1.nexus.bazaarvoice.com"
 
 func DeltaTestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("inside DeltaTestHandler")
@@ -27,14 +27,14 @@ func DeltaTestHandler(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("test: ", test)
 
-		details := "/sor/1/testonly/testdelta?audit=comment:'testing',host:aws-cms-01"
+		details := "/sor/1/emouitesttable/testdelta?audit=comment:'testing',host:aws-cms-01"
 		_, err := http.Post(URL + details, "application/x.json-delta", strings.NewReader(test.Original))
 		basics.Check(err)
 		_, err2 := http.Post(URL + details, "application/x.json-delta", strings.NewReader(test.Delta))
 		basics.Check(err2)
 
 		
-		resp3, err3 := http.Get(URL + "/sor/1/testonly/testdelta")
+		resp3, err3 := http.Get(URL + "/sor/1/emouitesttable/testdelta")
 		basics.Check(err3)
 
 		w.Header().Set("Content-Type", "application/json")
