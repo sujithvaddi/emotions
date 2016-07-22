@@ -39,8 +39,6 @@ func DeltaTestHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		io.Copy(w, resp3.Body)
-	case "GET":
-		fmt.Println("inside Delta test Get")
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
 	}

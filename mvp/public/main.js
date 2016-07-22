@@ -1,9 +1,76 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar')
-//import SearchBar from 'react-search-bar';
 
 $(function() {
+
+	var tabLinks = new Array();
+    var contentDivs = new Array();
+
+	function getFirstChildWithTagName( element, tagName ) {
+      for ( var i = 0; i < element.childNodes.length; i++ ) {
+        if ( element.childNodes[i].nodeName == tagName ) return element.childNodes[i];
+      }
+    }
+
+    function getHash( url ) {
+      var hashPos = url.lastIndexOf ( '#' );
+      return url.substring( hashPos + 1 );
+    }
+
+	function init() {
+
+      // Grab the tab links and content divs from the page
+      var tabListItems = document.getElementById('tabs').childNodes;
+      for ( var i = 0; i < tabListItems.length; i++ ) {
+        if ( tabListItems[i].nodeName == "LI" ) {
+          var tabLink = getFirstChildWithTagName( tabListItems[i], 'A' );
+          var id = getHash( tabLink.getAttribute('href') );
+          tabLinks[id] = tabLink;
+          contentDivs[id] = document.getElementById( id );
+        }
+      }
+
+      // Assign onclick events to the tab links, and
+      // highlight the first tab
+      var i = 0;
+
+      for ( var id in tabLinks ) {
+        tabLinks[id].onclick = showTab;
+        tabLinks[id].onfocus = function() { this.blur() };
+        if ( i == 0 ) tabLinks[id].className = 'selected';
+        i++;
+      }
+
+      // Hide all content divs except the first
+      var i = 0;
+
+      for ( var id in contentDivs ) {
+        if ( i != 0 ) contentDivs[id].className = 'tabContent hide';
+        i++;
+      }
+    }
+
+    function showTab() {
+      var selectedId = getHash( this.getAttribute('href') );
+
+      // Highlight the selected tab, and dim all others.
+      // Also show the selected content div, and hide all others.
+      for ( var id in contentDivs ) {
+        if ( id == selectedId ) {
+          tabLinks[id].className = 'selected';
+          contentDivs[id].className = 'tabContent';
+        } else {
+          tabLinks[id].className = '';
+          contentDivs[id].className = 'tabContent hide';
+        }
+      }
+
+      // Stop the browser following the link
+      return false;
+    }
+
+
 	$('#test-result').on('click', function() {
 		var delta = $('#edit-value').val();
 		var jsonStr = $("#" + $('#current-key').val()).text();
@@ -17,8 +84,17 @@ $(function() {
 			url: '/deltatest',
 			data: json,
 			success: function(data) {
-				$('#test-delta-result').empty().append('<h2>Results: </h2>' 
-					+ '<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
+				$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
+				$('#test-delta-result').empty().append('<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
+				for ( var id in contentDivs ) {
+			        if ( id == 'test-delta-result' ) {
+			          tabLinks[id].className = 'selected';
+			          contentDivs[id].className = 'tabContent';
+			        } else {
+			          tabLinks[id].className = '';
+			          contentDivs[id].className = 'tabContent hide';
+			        }
+			      }
 			},
 			error: function(err) {
 				alert("error with test send");
@@ -41,10 +117,11 @@ $(function() {
 			url: "/reviews",
 			data: json,
 			success: function(data) {
-				//stuff
+				//return some data, print a success statement 
 			}
-		})
+		});
 	});
+	init();
 });
 
 function getReviews(table) {
@@ -69,7 +146,7 @@ function getReviews(table) {
 				var textArr = text.split(': ');
 				var docName = textArr[1];
 				$('#current-key').val(docName);
-				editReview(docName);
+				generateEdit(docName);
 			});		
 		},
 		error: function (error) {
@@ -78,22 +155,52 @@ function getReviews(table) {
 	});
 }
 
-function editReview(doc) {
-	var $buttons = $('#document-edits');
+function generateEditButtons(obj) {
+	var $nestedJSON = $('#nested-json-buttons');
+	for (var key in obj) {
+		var value = obj[key];
+		if (typeof(value) != "object") {
+			if (key[0] != '~') {
+				$('#document-edits').append(
+					'<button class="btn btn-default edit-field" type="button" value="Submit">' +  key + ':' 
+					+ value + '</button>');
+			};
+		} 
+		else {
+			$('#nested-json-keys-buttons').append(
+				'<button class="btn btn-default nest-key" type="button" value="Submit">' +  key + '</button>');
+			if (!value.hasOwnProperty('0')) {
+				generateEditButtons(value);
+			}
+			else {
+				// do some stuff if object is an array
+				/*for(var idx in value) {
+
+				}*/
+			}
+		}
+	};
+}
+
+function generateEdit(doc) {
+	$('#document-edits').empty();
 	var jsonStr = $("#" + doc).text();
 	var obj = $.parseJSON(jsonStr);
-	$buttons.empty();
-	for (var key in obj) {
-		if (key[0] != '~') {
-			$buttons.append(
-				'<button class="btn btn-default edit-field" type="button" value="Submit">' +  key + ':' 
-				+ obj[key] + '</button>');
-		};
-	};
+	generateEditButtons(obj);
 	$('.edit-field').on('click', function () {
 		var buttonText = $(this).text();
 		var textArr = buttonText.split(':');
-		$('textarea#edit-value').val('{..,"' + textArr[0] + '":"' + textArr[1] + '"}');
+		var value = textArr[1];
+		//super hacky way of getting around true/false being wrapped in quotes
+		if (value != "true" && value != "false") {
+			value = "\"" + value + "\"";
+		};
+		$('#edit-value').val('{..,"' + textArr[0] + '":' + value + '}');
+	});
+	$('.nest-key').on('click', function () {
+		var key = $(this).text();
+		var delta = $('#edit-value').val();
+		$('#edit-value').val('{..,"' + key + '":' + delta + '}');
 	});
 }
 
@@ -114,7 +221,7 @@ var condtionalButtons = [
 
 var DeltaButton = React.createClass({
 	getDeltaFormat: function() {
-		var text = $('textarea#edit-value').val();
+		var text = $('#edit-value').val();
 		var deltaType = $(this).text();
 		var postData = {
 			"value": text,
@@ -134,10 +241,10 @@ var DeltaButton = React.createClass({
 		});
 	},
 	handleClick: function() {
-		var text = $('textarea#edit-value').selection();
-		if (text=="") {
-			text = $('textarea#edit-value').val();
-			$('textarea#edit-value').val("");
+		var text = $('#edit-value').selection();
+		if (text == "") {
+			text = $('#edit-value').val();
+			$('#edit-value').val("");
 		};
 		console.log("text");
 		console.log(text);
