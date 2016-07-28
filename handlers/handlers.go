@@ -15,6 +15,46 @@ import (
 
 const URL = "https://emodb-ci.dev.us-east-1.nexus.bazaarvoice.com"
 
+func addQuotes(val string) string {
+	if val == "true" || val == "false" {
+		return val
+	} else if val[0] == '{' || val[0] == '[' {
+		return val
+	} else {
+		return "\"" + val + "\""
+	}
+}
+
+
+func ButtonsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("insider ButtonsHandler")
+	switch r.Method{
+	case "GET":
+		buttonType := r.URL.Query().Get("buttonType")
+		buttonText := r.URL.Query().Get("buttonText")
+		currentTextArea := r.URL.Query().Get("currentTextArea")
+
+		fmt.Println("buttonType:" + buttonType + "buttonText:" + buttonText+ "currentTextArea:" + currentTextArea)
+
+		switch buttonType {
+		case "edit":
+			key_val := strings.Split(buttonText, ":")
+			key, val := key_val[0], key_val[1]
+			val = addQuotes(val)
+			response := "{..,\"" + key + "\":" + val + "}"
+			io.Copy(w, strings.NewReader(response))
+
+		case "key":
+			response :="{..,\"" + buttonText + "\":" + currentTextArea + "}"
+			io.Copy(w, strings.NewReader(response))
+		default:
+			fmt.Println("unrecognized buttonType")
+		}
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
+	}
+}
+
 func DeltaTestHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("inside DeltaTestHandler")
 	switch r.Method {
@@ -83,8 +123,6 @@ func DeltaConstructorHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "text/plain")
 		io.Copy(w, strings.NewReader(deltaString))
-	case "GET":
-		fmt.Println("inside DeltaConstructorHandler Get")
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
 	}
