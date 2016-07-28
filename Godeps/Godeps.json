@@ -1,0 +1,19 @@
+{
+	"ImportPath": "github.com/andeeliao",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/jasonlvhit/gocron",
+			"Rev": "42a5804d37aa0b9239b265e894a16b8edbf52d54"
+		},
+		{
+			"ImportPath": "github.com/tchap/go-patricia/patricia",
+			"Comment": "v2.2.3-4-gd6ad748",
+			"Rev": "d6ad748cf4490732320407f36c4b4fbe8cbc9343"
+		}
+	]
+}
