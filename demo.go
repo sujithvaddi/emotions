@@ -21,7 +21,9 @@ func main() {
 	http.HandleFunc("/deltatest", handlers.DeltaTestHandler)
 	fmt.Println("got to 1")
 	http.Handle("/", http.FileServer(http.Dir("./public")))
-	http.ListenAndServe(":" + PORT, nil)
+	fmt.Println("got to 2")
+	fmt.Println(PORT)
+	http.ListenAndServe(PORT, nil)
 
 }
 
