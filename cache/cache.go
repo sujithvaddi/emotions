@@ -1,7 +1,7 @@
 package cache
 
 import (
-	//"fmt"
+	"fmt"
 	"net/http"
 	"encoding/json"
 
@@ -12,7 +12,7 @@ import (
 )
 
 
-const URL = "https://emodb-ci.dev.us-east-1.nexus.bazaarvoice.com"
+const URL = "https://emodb-cert.qa.us-east-1.nexus.bazaarvoice.com"
 
 var TableCache *patricia.Trie
 
@@ -34,15 +34,21 @@ func Search(prefix string) structs.SearchResult {
 }
 
 func Populate() {
+	fmt.Println("Populating table")
 	resp, err := http.Get(URL + "/sor/1/_table?limit=1000000000")
+	fmt.Println("got table")
 	basics.Check(err)
 	defer resp.Body.Close()
 	
 	var Tables_list []structs.Table
+	fmt.Println("declared table")
 	decoder2 := json.NewDecoder(resp.Body)
+	fmt.Println("made NewDecoder")
 	decoder2.Decode(&Tables_list)
+	fmt.Println("decoded table, building table")
 
 	TableCache = BuildTrie(Tables_list)
+	fmt.Println("Finished populating table")
 }
 
 func Schedule() {

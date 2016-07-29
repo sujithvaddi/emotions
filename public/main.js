@@ -26,7 +26,6 @@ var GenericEditButton = React.createClass({
 				currentTextArea: this.props.currentTextArea
 			},
 			success: function(value) {
-				console.log("success GenericEditButton: " + value);
 				this.props.changeTextArea(value);
 			}.bind(this),
 			error: function(err) {
@@ -43,8 +42,6 @@ var GenericEditButton = React.createClass({
 
 var EditButtons = React.createClass({
 	render: function() {
-		console.log("rendering editButtons");
-		console.log(this.props.currentDoc);
 		var editButtons = [];
 		var nestedKeyButtons = [];
 		function generateEditButtons(obj, this_component) {
@@ -159,49 +156,39 @@ var condtionalButtons = [
 ]
 
 var DeltaButton = React.createClass({
-	getDeltaFormat: function() {
-		var text = $('#edit-value').val();
-		var deltaType = $(this).text();
-		var postData = {
-			"value": text,
-			"type": deltaType
-		};
-		var json_data = JSON.stringify(postData);
-		$.ajax({
-			type: 'POST',
-			url: '/deltaconstructor',
-			data: json_data,
-			success: function(data) {
-				$('#edit-value').val(data);
-			},
-			error: function(data) {
-				console.log("something went wrong with ajax from DeltaButton");
-			}
-		});
-	},
 	handleClick: function() {
 		var text = $('#edit-value').selection();
 		if (text == "") {
-			text = $('#edit-value').val();
-			$('#edit-value').val("");
+			text = this.props.currentTextArea;
 		};
 		var postData = {
 			"value": text,
 			"type": this.props.buttonText
 		};
 		var json_data = JSON.stringify(postData);
+		console.log(json_data);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
 			data: json_data,
 			success: function(data) {
-				$('#edit-value').selection('replace', {text: data});
+				console.log("data sent back: " + data);
+				this.props.changeTextArea(data);
+			}.bind(this),
+			error: function(err) {
+				alert("error from DeltaButton: " + error);
 			}
 		});
 	},
 	render: function() {
 		return (
-			<button onClick={this.handleClick} className={this.props.thisClass} type="button" data-toggle="tooltip" title={this.props.tooltipText} data-html="true"
+			<button 
+				onClick={this.handleClick} 
+				className={this.props.thisClassName} 
+				type="button" 
+				data-toggle="tooltip" 
+				title={this.props.tooltipText} 
+				data-html="true"
          		>{this.props.buttonText}</button>
 			);
 	}
@@ -214,9 +201,15 @@ var ButtonList = React.createClass({
 	render: function() {
 		var buttons = this.props.data.map(function(button) {
 			return (
-				<DeltaButton buttonText={button.name} key={button.name} tooltipText={button.title} thisClassName={"btn btn-default edit-selected"} />
+				<DeltaButton 
+					buttonText={button.name} 
+					key={button.name} 
+					tooltipText={button.title} 
+					thisClassName={"btn btn-default"}
+					changeTextArea={this.props.changeTextArea}
+					currentTextArea={this.props.currentTextArea} />
 				);
-		});
+		}, this);
 		return (<div>{buttons}</div>);
 	}
 });
@@ -237,7 +230,6 @@ const TablesSearchBar = React.createClass({
 	},
 	onSubmit: function(input) {
     	if (!input) return;
-    	console.log("onsubmit " + this.props.currentTextArea);
 		//edit this to use the new react components
 		$.ajax({
 			type: 'GET',
@@ -267,9 +259,14 @@ var ButtonColumn = React.createClass({
 	render: function() {
 		return (
 			<div>
-			<div id="delta-buttons">Deltas: <ButtonList data={this.props.deltas} /><br/></div>
-			<div id="conditional-buttons">Conditionals: <ButtonList data={this.props.conditionals} /><br/></div>
-			<div id="document-edits" ></div>
+			<div id="delta-buttons">Deltas: <ButtonList 
+												data={this.props.deltas}
+												changeTextArea={this.props.changeTextArea}
+												currentTextArea={this.props.currentTextArea} /><br/></div>
+			<div id="conditional-buttons">Conditionals: <ButtonList 
+															data={this.props.conditionals}
+															changeTextArea={this.props.changeTextArea}
+															currentTextArea={this.props.currentTextArea} /><br/></div>
 			</div>
 			);
 	}
@@ -314,7 +311,6 @@ var EmoUI = React.createClass({
 		});
 	},
 	handleCurrentDocumentChange: function(doc) {
-		console.log(doc);
 		this.setState({
 			currentEditDocument: doc
 		});
@@ -374,7 +370,8 @@ var EmoUI = React.createClass({
 		return (
 			<div>
 				<div className="row">
-					<div className="col-md-9">
+					<div className="col-md-6 left">
+						<img src="upload.jpg" width="30%"/>
 						<div className="search-bar">
 							<TablesSearchBar 
 								throttle={1000} 
@@ -382,17 +379,17 @@ var EmoUI = React.createClass({
 								updateDocs={this.handleDocumentListChange} />
 						</div>
 						<div id="current-stuff">
-							Current Table: <input id="current-table2" 
+							Current Table: <input id="current-table" 
 												value={this.state.currentTableValue} 
 												readOnly 
 												onChange={this.onChange}/>
-							Current Key: <input id="current-key2" 
+							Current Key: <input id="current-key" 
 												value={this.state.currentKeyValue} 
 												readOnly 
 												onChange={this.onChange} />
 						</div>
 						<div id="content5">
-						      <form>Editable value:<br/>
+						      <form><h2>Editable value:</h2><br/>
 						            <textarea 
 							            id="edit-value" 
 							            type="text" 
@@ -401,20 +398,15 @@ var EmoUI = React.createClass({
 							            style={{width: 300, maxHeight: 100}} 
 							            onChange={this.handleTextAreaChange} /><br/>
 						      Options:
-						            <button id="test-result" type="button">See Test Result</button>
-						            <button id="send-delta" type="button">Send Update</button><br/>
-						      *Hover to see usage and example. <b>Bolded</b> text means text has been selected
+						            <button className="btn btn-default" id="test-result" type="button">See Test Result</button>
+						            <button className="btn btn-default" id="send-delta" type="button">Send Update</button><br/>
 						      </form>
 						</div>
 		                <div>
-		                    <ul id="tabs">
-		                        <li><a href="#original-delta">Original Delta</a></li>
-		                        <li><a href="#test-delta-result">Results</a></li>
-		                    </ul>
-		                    <div className="tabContent" id="original-delta"></div>
-		                    <div className="tabContent" id="test-delta-result"></div>
-		                    <div id="content3"></div>
+		                    <div className="col-md-3" id="original-delta"></div>
+		                    <div className="col-md-3" id="test-delta-result"></div>
 		                </div>
+		                <div><h2>Documents</h2></div>
 						<div>
 							<CoordinateList 
 								data={this.state.documentList} 
@@ -424,17 +416,20 @@ var EmoUI = React.createClass({
 			        			updateCurrentDoc={this.handleCurrentDocumentChange} />
 						</div>
 					</div>
-					<div className="col-md-3">
+					<div className="col-md-3 right deltas-conditionals">
 			        	<div><ButtonColumn
 			        			deltas={deltaButtons} 
-			        			conditionals={condtionalButtons}/>
+			        			conditionals={condtionalButtons}
+								changeTextArea={this.handleButtonTextAreaChange}
+								currentTextArea={this.state.currentTextAreaValue} />
 			        	</div>
-			        	<div>
+			        	<div className="document-edits">
 			        		<EditButtons 
 			        			currentDoc={this.state.currentEditDocument} 
 								changeTextArea={this.handleButtonTextAreaChange}
 								currentTextArea={this.state.currentTextAreaValue} />
 						</div>
+						<div>*Hover to see usage and example. <b>Bolded</b> text means text has been selected</div>
 			        </div>  
 				</div>
 			</div>

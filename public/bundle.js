@@ -1050,7 +1050,6 @@ var GenericEditButton = React.createClass({
 				currentTextArea: this.props.currentTextArea
 			},
 			success: function (value) {
-				console.log("success GenericEditButton: " + value);
 				this.props.changeTextArea(value);
 			}.bind(this),
 			error: function (err) {
@@ -1071,8 +1070,6 @@ var EditButtons = React.createClass({
 	displayName: 'EditButtons',
 
 	render: function () {
-		console.log("rendering editButtons");
-		console.log(this.props.currentDoc);
 		var editButtons = [];
 		var nestedKeyButtons = [];
 		function generateEditButtons(obj, this_component) {
@@ -1198,50 +1195,40 @@ var condtionalButtons = [{ "name": "Make Conditional", "title": "makes delta con
 var DeltaButton = React.createClass({
 	displayName: 'DeltaButton',
 
-	getDeltaFormat: function () {
-		var text = $('#edit-value').val();
-		var deltaType = $(this).text();
-		var postData = {
-			"value": text,
-			"type": deltaType
-		};
-		var json_data = JSON.stringify(postData);
-		$.ajax({
-			type: 'POST',
-			url: '/deltaconstructor',
-			data: json_data,
-			success: function (data) {
-				$('#edit-value').val(data);
-			},
-			error: function (data) {
-				console.log("something went wrong with ajax from DeltaButton");
-			}
-		});
-	},
 	handleClick: function () {
 		var text = $('#edit-value').selection();
 		if (text == "") {
-			text = $('#edit-value').val();
-			$('#edit-value').val("");
+			text = this.props.currentTextArea;
 		};
 		var postData = {
 			"value": text,
 			"type": this.props.buttonText
 		};
 		var json_data = JSON.stringify(postData);
+		console.log(json_data);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
 			data: json_data,
 			success: function (data) {
-				$('#edit-value').selection('replace', { text: data });
+				console.log("data sent back: " + data);
+				this.props.changeTextArea(data);
+			}.bind(this),
+			error: function (err) {
+				alert("error from DeltaButton: " + error);
 			}
 		});
 	},
 	render: function () {
 		return React.createElement(
 			'button',
-			{ onClick: this.handleClick, className: this.props.thisClass, type: 'button', 'data-toggle': 'tooltip', title: this.props.tooltipText, 'data-html': 'true'
+			{
+				onClick: this.handleClick,
+				className: this.props.thisClassName,
+				type: 'button',
+				'data-toggle': 'tooltip',
+				title: this.props.tooltipText,
+				'data-html': 'true'
 			},
 			this.props.buttonText
 		);
@@ -1256,8 +1243,14 @@ var ButtonList = React.createClass({
 	},
 	render: function () {
 		var buttons = this.props.data.map(function (button) {
-			return React.createElement(DeltaButton, { buttonText: button.name, key: button.name, tooltipText: button.title, thisClassName: "btn btn-default edit-selected" });
-		});
+			return React.createElement(DeltaButton, {
+				buttonText: button.name,
+				key: button.name,
+				tooltipText: button.title,
+				thisClassName: "btn btn-default",
+				changeTextArea: this.props.changeTextArea,
+				currentTextArea: this.props.currentTextArea });
+		}, this);
 		return React.createElement(
 			'div',
 			null,
@@ -1284,7 +1277,6 @@ const TablesSearchBar = React.createClass({
 	},
 	onSubmit: function (input) {
 		if (!input) return;
-		console.log("onsubmit " + this.props.currentTextArea);
 		//edit this to use the new react components
 		$.ajax({
 			type: 'GET',
@@ -1318,17 +1310,22 @@ var ButtonColumn = React.createClass({
 				'div',
 				{ id: 'delta-buttons' },
 				'Deltas: ',
-				React.createElement(ButtonList, { data: this.props.deltas }),
+				React.createElement(ButtonList, {
+					data: this.props.deltas,
+					changeTextArea: this.props.changeTextArea,
+					currentTextArea: this.props.currentTextArea }),
 				React.createElement('br', null)
 			),
 			React.createElement(
 				'div',
 				{ id: 'conditional-buttons' },
 				'Conditionals: ',
-				React.createElement(ButtonList, { data: this.props.conditionals }),
+				React.createElement(ButtonList, {
+					data: this.props.conditionals,
+					changeTextArea: this.props.changeTextArea,
+					currentTextArea: this.props.currentTextArea }),
 				React.createElement('br', null)
-			),
-			React.createElement('div', { id: 'document-edits' })
+			)
 		);
 	}
 });
@@ -1372,7 +1369,6 @@ var EmoUI = React.createClass({
 		});
 	},
 	handleCurrentDocumentChange: function (doc) {
-		console.log(doc);
 		this.setState({
 			currentEditDocument: doc
 		});
@@ -1437,7 +1433,8 @@ var EmoUI = React.createClass({
 				{ className: 'row' },
 				React.createElement(
 					'div',
-					{ className: 'col-md-9' },
+					{ className: 'col-md-6 left' },
+					React.createElement('img', { src: 'upload.jpg', width: '30%' }),
 					React.createElement(
 						'div',
 						{ className: 'search-bar' },
@@ -1450,12 +1447,12 @@ var EmoUI = React.createClass({
 						'div',
 						{ id: 'current-stuff' },
 						'Current Table: ',
-						React.createElement('input', { id: 'current-table2',
+						React.createElement('input', { id: 'current-table',
 							value: this.state.currentTableValue,
 							readOnly: true,
 							onChange: this.onChange }),
 						'Current Key: ',
-						React.createElement('input', { id: 'current-key2',
+						React.createElement('input', { id: 'current-key',
 							value: this.state.currentKeyValue,
 							readOnly: true,
 							onChange: this.onChange })
@@ -1466,7 +1463,11 @@ var EmoUI = React.createClass({
 						React.createElement(
 							'form',
 							null,
-							'Editable value:',
+							React.createElement(
+								'h2',
+								null,
+								'Editable value:'
+							),
 							React.createElement('br', null),
 							React.createElement('textarea', {
 								id: 'edit-value',
@@ -1479,52 +1480,31 @@ var EmoUI = React.createClass({
 							'Options:',
 							React.createElement(
 								'button',
-								{ id: 'test-result', type: 'button' },
+								{ className: 'btn btn-default', id: 'test-result', type: 'button' },
 								'See Test Result'
 							),
 							React.createElement(
 								'button',
-								{ id: 'send-delta', type: 'button' },
+								{ className: 'btn btn-default', id: 'send-delta', type: 'button' },
 								'Send Update'
 							),
-							React.createElement('br', null),
-							'*Hover to see usage and example. ',
-							React.createElement(
-								'b',
-								null,
-								'Bolded'
-							),
-							' text means text has been selected'
+							React.createElement('br', null)
 						)
 					),
 					React.createElement(
 						'div',
 						null,
+						React.createElement('div', { className: 'col-md-3', id: 'original-delta' }),
+						React.createElement('div', { className: 'col-md-3', id: 'test-delta-result' })
+					),
+					React.createElement(
+						'div',
+						null,
 						React.createElement(
-							'ul',
-							{ id: 'tabs' },
-							React.createElement(
-								'li',
-								null,
-								React.createElement(
-									'a',
-									{ href: '#original-delta' },
-									'Original Delta'
-								)
-							),
-							React.createElement(
-								'li',
-								null,
-								React.createElement(
-									'a',
-									{ href: '#test-delta-result' },
-									'Results'
-								)
-							)
-						),
-						React.createElement('div', { className: 'tabContent', id: 'original-delta' }),
-						React.createElement('div', { className: 'tabContent', id: 'test-delta-result' }),
-						React.createElement('div', { id: 'content3' })
+							'h2',
+							null,
+							'Documents'
+						)
 					),
 					React.createElement(
 						'div',
@@ -1539,21 +1519,34 @@ var EmoUI = React.createClass({
 				),
 				React.createElement(
 					'div',
-					{ className: 'col-md-3' },
+					{ className: 'col-md-3 right deltas-conditionals' },
 					React.createElement(
 						'div',
 						null,
 						React.createElement(ButtonColumn, {
 							deltas: deltaButtons,
-							conditionals: condtionalButtons })
+							conditionals: condtionalButtons,
+							changeTextArea: this.handleButtonTextAreaChange,
+							currentTextArea: this.state.currentTextAreaValue })
 					),
 					React.createElement(
 						'div',
-						null,
+						{ className: 'document-edits' },
 						React.createElement(EditButtons, {
 							currentDoc: this.state.currentEditDocument,
 							changeTextArea: this.handleButtonTextAreaChange,
 							currentTextArea: this.state.currentTextAreaValue })
+					),
+					React.createElement(
+						'div',
+						null,
+						'*Hover to see usage and example. ',
+						React.createElement(
+							'b',
+							null,
+							'Bolded'
+						),
+						' text means text has been selected'
 					)
 				)
 			)

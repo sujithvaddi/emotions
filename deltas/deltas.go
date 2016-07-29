@@ -1,9 +1,10 @@
 package deltas
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/andeeliao/structs"
 	"strings"
+	"regexp"
 )
 
 //turns a struct into the specified delta 
@@ -66,4 +67,18 @@ func deltaToDict(delta string) (deltaMap map[string]string) {
 		deltaMap["key"] = deltaPieces[1]
 	}
 	return 
+}
+
+func splitIntoKeyValue(delta string) (deltaMap map[string]string) {
+	deltaMap = make(map[string]string)
+
+	r_key, _ := regexp.Compile("{.+?:")
+	r_value, _ := regexp.Compile(":.+}")
+    fmt.Println(r_key.FindString(delta))
+    fmt.Println(r_value.FindString(delta))
+
+    deltaMap["key"] = r_key.FindString(delta)
+    deltaMap["value"] = r_value.FindString(delta)
+    return 
+	
 }
