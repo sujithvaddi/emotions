@@ -1,1 +1,1 @@
-web: go run mvp/demo.go $PORT
+web: andeeliao $PORT
