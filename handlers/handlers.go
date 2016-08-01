@@ -13,7 +13,7 @@ import (
 	"encoding/json"
 )
 
-const URL = "https://emodb-cert.qa.us-east-1.nexus.bazaarvoice.com"
+const URL = "https://emodb.cert.us-east-1.nexus.bazaarvoice.com:8080"
 
 func addQuotes(val string) string {
 	if val == "true" || val == "false" {
