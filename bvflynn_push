@@ -1,4 +1,3 @@
-flynn -c qa-us-east-1 delete -y
 export BVFLYNN_TEAM='emodb_dev@bazaarvoice.com'
 export BVFLYNN_APP='emo_ui'
 export BVFLYNN_ENDPOINT='qa-us-east-1'

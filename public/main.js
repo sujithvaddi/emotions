@@ -12,11 +12,6 @@ var CoordinateCode = React.createClass({
 
 var GenericEditButton = React.createClass({
 	editTextArea: function() {
-		console.log({
-				buttonType: this.props.buttonType,
-				buttonText: this.props.faceValue,
-				currentTextArea: this.props.currentTextArea
-			});
 		$.ajax({
 			type: "GET",
 			url: "/buttons",
@@ -29,13 +24,17 @@ var GenericEditButton = React.createClass({
 				this.props.changeTextArea(value);
 			}.bind(this),
 			error: function(err) {
-				console.log("error from GenericEditButton: " + err);
+				alert("error from GenericEditButton: " + err);
 			}
 		})
 	},
 	render: function() {
+		var faceValueRendner = this.props.faceValue;
+		if (faceValueRendner.length > 25) {
+			faceValueRendner = faceValueRendner.substring(0, 25) + "...";
+		};
 		return (
-			<button className="btn btn-default" onClick={this.editTextArea} >{this.props.faceValue}</button>
+			<button className="btn btn-default" onClick={this.editTextArea} >{faceValueRendner}</button>
 			);
 	}
 });
@@ -71,7 +70,7 @@ var EditButtons = React.createClass({
 						editButtons.push(<GenericEditButton 
 											key={key} 
 											buttonType="edit" 
-											faceValue={"[array]"} 
+											faceValue={key + ':' + value} 
 											currentTextArea={this_component.props.currentTextArea}
 											changeTextArea={this_component.props.changeTextArea} />);
 					}
@@ -166,13 +165,11 @@ var DeltaButton = React.createClass({
 			"type": this.props.buttonText
 		};
 		var json_data = JSON.stringify(postData);
-		console.log(json_data);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
 			data: json_data,
 			success: function(data) {
-				console.log("data sent back: " + data);
 				this.props.changeTextArea(data);
 			}.bind(this),
 			error: function(err) {
