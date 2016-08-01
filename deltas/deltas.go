@@ -14,12 +14,12 @@ import (
 
 
 func Map(data structs.DeltaConstructorData) string {
-	deltaMap := deltaToDict(data.Value)
+	deltaMap := splitIntoKeyValue(data.Value)
 	return "{..,\"" + deltaMap["key"] + "\":\"" + deltaMap["value"] + "\"}"
 }
 
 func Literal(data structs.DeltaConstructorData) string {
-	deltaMap := deltaToDict(data.Value)
+	deltaMap := splitIntoKeyValue(data.Value)
 	return "{\"" + deltaMap["key"] + "\":\"" + deltaMap["value"] + "\"}"
 }
 
@@ -28,7 +28,7 @@ func DeleteDoc(data structs.DeltaConstructorData) string {
 }
 
 func DeleteKey(data structs.DeltaConstructorData) string {
-	deltaMap := deltaToDict(data.Value)
+	deltaMap := splitIntoKeyValue(data.Value)
 	return "{..,\"" + deltaMap["key"] + "\":~}"
 }
 
@@ -55,18 +55,6 @@ func AlwaysTrue(data structs.DeltaConstructorData) string {
 
 func AlwaysFalse(data structs.DeltaConstructorData) string {
 	return "alwaysFalse()"
-}
-
-func deltaToDict(delta string) (deltaMap map[string]string) {
-	deltaMap = make(map[string]string)
-	
-	if deltaPieces := strings.Split(delta, "\"") ; len(deltaPieces) > 3 {
-		deltaMap["key"] = deltaPieces[1]
-		deltaMap["value"] = deltaPieces[3]
-	} else if len(deltaPieces) > 0 {
-		deltaMap["key"] = deltaPieces[1]
-	}
-	return 
 }
 
 func splitIntoKeyValue(delta string) (deltaMap map[string]string) {

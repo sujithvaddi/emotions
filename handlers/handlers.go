@@ -17,7 +17,9 @@ import (
 func addQuotes(val string) string {
 	if val == "true" || val == "false" {
 		return val
-	} else if val[0] == '{' || val[0] == '[' {
+	} else if val[0] == '{' || val[0] == '[' { //should replace this with regexp
+		return val
+	} else if i, err := strconv.Atoi(val) ; err == nil {
 		return val
 	} else {
 		return "\"" + val + "\""
