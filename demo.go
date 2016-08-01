@@ -12,7 +12,7 @@ import (
 func main() {
 	PORT := os.Args[1]
 	if PORT == "local" {
-		PORT == ":8001"
+		PORT = ":8001"
 	}
 	cache.SetupEmoURL(PORT)
 
