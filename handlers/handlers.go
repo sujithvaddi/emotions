@@ -3,28 +3,16 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"github.com/andeeliao/basics"
-	"github.com/andeeliao/structs"
-	"github.com/andeeliao/deltas"
-	"github.com/andeeliao/cache"
 	"io"
 	//"io/ioutil"
 	"strings"
 	"encoding/json"
+
+	"github.com/andeeliao/basics"
+	"github.com/andeeliao/structs"
+	"github.com/andeeliao/deltas"
+	"github.com/andeeliao/cache"
 )
-
-
-func addQuotes(val string) string {
-	if val == "true" || val == "false" {
-		return val
-	} else if val[0] == '{' || val[0] == '[' { //should replace this with regexp
-		return val
-	} else if i, err := strconv.Atoi(val) ; err == nil {
-		return val
-	} else {
-		return "\"" + val + "\""
-	}
-}
 
 
 func ButtonsHandler(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +29,7 @@ func ButtonsHandler(w http.ResponseWriter, r *http.Request) {
 		case "edit":
 			key_val := strings.Split(buttonText, ":")
 			key, val := key_val[0], key_val[1]
-			val = addQuotes(val)
+			val = deltas.AddQuotes(val)
 			response := "{..,\"" + key + "\":" + val + "}"
 			io.Copy(w, strings.NewReader(response))
 

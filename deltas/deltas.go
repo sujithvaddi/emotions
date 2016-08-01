@@ -2,9 +2,10 @@ package deltas
 
 import (
 	"fmt"
-	"github.com/andeeliao/structs"
-	"strings"
 	"regexp"
+	"strconv"
+	
+	"github.com/andeeliao/structs"
 )
 
 //turns a struct into the specified delta 
@@ -15,12 +16,12 @@ import (
 
 func Map(data structs.DeltaConstructorData) string {
 	deltaMap := splitIntoKeyValue(data.Value)
-	return "{..,\"" + deltaMap["key"] + "\":\"" + deltaMap["value"] + "\"}"
+	return "{..,\"" + deltaMap["key"] + "\":" + AddQuotes(deltaMap["value"]) + "}"
 }
 
 func Literal(data structs.DeltaConstructorData) string {
 	deltaMap := splitIntoKeyValue(data.Value)
-	return "{\"" + deltaMap["key"] + "\":\"" + deltaMap["value"] + "\"}"
+	return "{\"" + deltaMap["key"] + "\":" + AddQuotes(deltaMap["value"]) + "}"
 }
 
 func DeleteDoc(data structs.DeltaConstructorData) string {
@@ -60,13 +61,32 @@ func AlwaysFalse(data structs.DeltaConstructorData) string {
 func splitIntoKeyValue(delta string) (deltaMap map[string]string) {
 	deltaMap = make(map[string]string)
 
-	r_key, _ := regexp.Compile("{.+?:")
-	r_value, _ := regexp.Compile(":.+}")
-    fmt.Println(r_key.FindString(delta))
-    fmt.Println(r_value.FindString(delta))
+	rKey, _ := regexp.Compile("{.+?:")
+	rValue, _ := regexp.Compile(":.+}")
+	keyHalf := rKey.FindString(delta)
+	valueHalf := rValue.FindString(delta)
 
-    deltaMap["key"] = r_key.FindString(delta)
-    deltaMap["value"] = r_value.FindString(delta)
+    rInsideQuotes, _ := regexp.Compile("\".+\"")
+    key := rInsideQuotes.FindString(keyHalf)
+
+    fmt.Println(key)
+    fmt.Println(valueHalf)
+
+    deltaMap["key"] = key[1:len(key)-1]
+    deltaMap["value"] = valueHalf[1:len(valueHalf)-1]
     return 
 	
+}
+
+
+func AddQuotes(val string) string {
+	if val == "true" || val == "false" {
+		return val
+	} else if val[0] == '{' || val[0] == '[' { //should replace this with regexp
+		return val
+	} else if _, err := strconv.Atoi(val) ; err == nil {
+		return val
+	} else {
+		return "\"" + val + "\""
+	}
 }
