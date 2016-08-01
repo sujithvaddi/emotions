@@ -156,21 +156,26 @@ var condtionalButtons = [
 
 var DeltaButton = React.createClass({
 	handleClick: function() {
-		var text = $('#edit-value').selection();
-		if (text == "") {
-			text = this.props.currentTextArea;
-		};
+		var text = $("#edit-value").selection();
 		var postData = {
-			"value": text,
 			"type": this.props.buttonText
 		};
+		if (text == "") {
+			postData["text"] = this.props.currentTextArea;
+		} else {
+			postData["text"] = text;
+		}
 		var json_data = JSON.stringify(postData);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
 			data: json_data,
 			success: function(data) {
-				this.props.changeTextArea(data);
+				if (text != "") {
+					$("#edit-value").selection("replace", {text: data});
+				} else {
+					this.props.changeTextArea(data);
+				}
 			}.bind(this),
 			error: function(err) {
 				alert("error from DeltaButton: " + error);

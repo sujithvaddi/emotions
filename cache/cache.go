@@ -47,7 +47,7 @@ func Populate() {
 
 	fmt.Println("Populating table from this URL: " + URL)
 	basics.Check(err)
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 	
 	var Tables_list []structs.Table
 	decoder2 := json.NewDecoder(resp.Body)
