@@ -10,9 +10,12 @@ import (
 
 
 func main() {
-	cache.SetupEmoURL()
-
 	PORT := os.Args[1]
+	if PORT == "local" {
+		PORT == ":8001"
+	}
+	cache.SetupEmoURL(PORT)
+
 	cache.Populate()
 	cache.Schedule()
 

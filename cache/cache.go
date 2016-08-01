@@ -2,7 +2,6 @@ package cache
 
 import (
 	"fmt"
-	"net"
 	"net/http"
 	"encoding/json"
 
@@ -15,10 +14,8 @@ import (
 
 var URL string 
 
-func SetupEmoURL() {
- 	IPAddr, err := net.ResolveIPAddr("ip4", "localhost")
- 	basics.Check(err)
- 	if IPAddr.String() == "127.0.0.1" {
+func SetupEmoURL(port string) {
+ 	if port == ":8001" {
  		URL = "https://emodb-cert.qa.us-east-1.nexus.bazaarvoice.com"
  	} else {
  		URL = "emodb.cert.us-east-1.nexus.bazaarvoice.com:8080"
@@ -47,6 +44,8 @@ func Search(prefix string) structs.SearchResult {
 func Populate() {
 	fmt.Println("Populating table")
 	resp, err := http.Get(URL + "/sor/1/_table?limit=1000000000")
+
+	fmt.Println("Populating table from this URL: " + URL)
 	basics.Check(err)
 	defer resp.Body.Close()
 	
