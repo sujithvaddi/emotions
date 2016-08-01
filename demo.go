@@ -10,10 +10,12 @@ import (
 
 
 func main() {
-	PORT := os.Args[1]
+	cache.SetupEmoURL()
 
+	PORT := os.Args[1]
 	cache.Populate()
 	cache.Schedule()
+
 	http.HandleFunc("/buttons", handlers.ButtonsHandler)
 	http.HandleFunc("/tables", handlers.TablesListHandler)
 	http.HandleFunc("/reviews", handlers.ReviewsHandler)

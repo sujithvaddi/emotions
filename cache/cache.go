@@ -2,6 +2,7 @@ package cache
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"encoding/json"
 
@@ -12,7 +13,17 @@ import (
 )
 
 
-const URL = "https://emodb.cert.us-east-1.nexus.bazaarvoice.com:8080"
+var URL string 
+
+func SetupEmoURL() {
+ 	IPAddr, err := net.ResolveIPAddr("ip4", "localhost")
+ 	basics.Check(err)
+ 	if IPAddr.String() == "127.0.0.1" {
+ 		URL = "https://emodb-cert.qa.us-east-1.nexus.bazaarvoice.com"
+ 	} else {
+ 		URL = "emodb.cert.us-east-1.nexus.bazaarvoice.com:8080"
+ 	}
+}
 
 var TableCache *patricia.Trie
 
