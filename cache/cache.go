@@ -36,12 +36,10 @@ func Search(prefix string) structs.SearchResult {
 func Populate() {
 	fmt.Println("Populating table")
 	resp, err := http.Get(URL + "/sor/1/_table?limit=1000000000")
-	fmt.Println("got table from: " +URL)
 	basics.Check(err)
 	defer resp.Body.Close()
 	
 	var Tables_list []structs.Table
-	fmt.Println("declared table")
 	decoder2 := json.NewDecoder(resp.Body)
 	fmt.Println("made NewDecoder")
 	decoder2.Decode(&Tables_list)
