@@ -1196,16 +1196,16 @@ var DeltaButton = React.createClass({
 
 	handleClick: function () {
 		var text = $("#edit-value").selection();
-		console.log("selection: " + text);
 		var postData = {
 			"type": this.props.buttonText
 		};
 		if (text == "") {
-			postData["text"] = this.props.currentTextArea;
+			postData["value"] = this.props.currentTextArea;
 		} else {
-			postData["text"] = text;
+			postData["value"] = text;
 		}
 		var json_data = JSON.stringify(postData);
+		console.log(json_data);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
@@ -1390,16 +1390,8 @@ var EmoUI = React.createClass({
 				url: '/deltatest',
 				data: json,
 				success: function (data) {
+					$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
 					$('#test-delta-result').empty().append('<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
-					for (var id in contentDivs) {
-						if (id == 'test-delta-result') {
-							tabLinks[id].className = 'selected';
-							contentDivs[id].className = 'tabContent';
-						} else {
-							tabLinks[id].className = '';
-							contentDivs[id].className = 'tabContent hide';
-						}
-					}
 				},
 				error: function (err) {
 					alert("error with test send");
@@ -1452,12 +1444,10 @@ var EmoUI = React.createClass({
 						'Current Table: ',
 						React.createElement('input', { id: 'current-table',
 							value: this.state.currentTableValue,
-							readOnly: true,
 							onChange: this.onChange }),
 						'Current Key: ',
 						React.createElement('input', { id: 'current-key',
 							value: this.state.currentKeyValue,
-							readOnly: true,
 							onChange: this.onChange })
 					),
 					React.createElement(
@@ -1496,9 +1486,13 @@ var EmoUI = React.createClass({
 					),
 					React.createElement(
 						'div',
-						null,
-						React.createElement('div', { className: 'col-md-3', id: 'original-delta' }),
-						React.createElement('div', { className: 'col-md-3', id: 'test-delta-result' })
+						{ id: 'edit-document-container' },
+						'Original: ',
+						React.createElement('br', null),
+						React.createElement('div', { id: 'original-delta' }),
+						'Test Results (some fields will be marked EmoUI):',
+						React.createElement('br', null),
+						React.createElement('div', { id: 'test-delta-result' })
 					),
 					React.createElement(
 						'div',
@@ -1532,6 +1526,7 @@ var EmoUI = React.createClass({
 							changeTextArea: this.handleButtonTextAreaChange,
 							currentTextArea: this.state.currentTextAreaValue })
 					),
+					React.createElement('br', null),
 					React.createElement(
 						'div',
 						{ className: 'document-edits' },

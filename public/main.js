@@ -161,11 +161,12 @@ var DeltaButton = React.createClass({
 			"type": this.props.buttonText
 		};
 		if (text == "") {
-			postData["text"] = this.props.currentTextArea;
+			postData["value"] = this.props.currentTextArea;
 		} else {
-			postData["text"] = text;
+			postData["value"] = text;
 		}
 		var json_data = JSON.stringify(postData);
+		console.log(json_data);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
@@ -331,16 +332,8 @@ var EmoUI = React.createClass({
 				url: '/deltatest',
 				data: json,
 				success: function(data) {
+					$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
 					$('#test-delta-result').empty().append('<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
-					for ( var id in contentDivs ) {
-				        if ( id == 'test-delta-result' ) {
-				          tabLinks[id].className = 'selected';
-				          contentDivs[id].className = 'tabContent';
-				        } else {
-				          tabLinks[id].className = '';
-				          contentDivs[id].className = 'tabContent hide';
-				        }
-				      }
 				},
 				error: function(err) {
 					alert("error with test send");
@@ -383,11 +376,9 @@ var EmoUI = React.createClass({
 						<div id="current-stuff">
 							Current Table: <input id="current-table" 
 												value={this.state.currentTableValue} 
-												readOnly 
 												onChange={this.onChange}/>
 							Current Key: <input id="current-key" 
 												value={this.state.currentKeyValue} 
-												readOnly 
 												onChange={this.onChange} />
 						</div>
 						<div id="content5">
@@ -404,9 +395,11 @@ var EmoUI = React.createClass({
 						            <button className="btn btn-default" id="send-delta" type="button">Send Update</button><br/>
 						      </form>
 						</div>
-		                <div>
-		                    <div className="col-md-3" id="original-delta"></div>
-		                    <div className="col-md-3" id="test-delta-result"></div>
+		                <div id="edit-document-container">
+		                Original: <br/>
+		                    <div id="original-delta"></div>
+		                    Test Results (some fields will be marked EmoUI):<br/>
+		                    <div id="test-delta-result"></div>
 		                </div>
 		                <div><h2>Documents</h2></div>
 						<div>
@@ -424,7 +417,7 @@ var EmoUI = React.createClass({
 			        			conditionals={condtionalButtons}
 								changeTextArea={this.handleButtonTextAreaChange}
 								currentTextArea={this.state.currentTextAreaValue} />
-			        	</div>
+			        	</div><br/>
 			        	<div className="document-edits">
 			        		<EditButtons 
 			        			currentDoc={this.state.currentEditDocument} 
