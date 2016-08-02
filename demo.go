@@ -11,8 +11,10 @@ import (
 
 func main() {
 	PORT := os.Args[1]
+	fmt.Println("here " + PORT)
+
 	if PORT == "local" {
-		PORT = ":8001"
+		PORT = "8001"
 	}
 	cache.SetupEmoURL(PORT)
 
@@ -28,7 +30,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 	fmt.Println("got to 2")
 	fmt.Println(PORT)
-	http.ListenAndServe(PORT, nil)
+	http.ListenAndServe(":" + PORT, nil)
 	fmt.Println("past ListenAndServe???")
 
 }

@@ -15,7 +15,7 @@ import (
 var URL string 
 
 func SetupEmoURL(port string) {
- 	if port == ":8001" {
+ 	if port == "8001" {
  		URL = "https://emodb-cert.qa.us-east-1.nexus.bazaarvoice.com"
  	} else {
  		URL = "http://emodb.cert.us-east-1.nexus.bazaarvoice.com:8080"
