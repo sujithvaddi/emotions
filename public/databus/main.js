@@ -1,8 +1,8 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var SearchBar = require('react-search-bar');
-var JQuery = require('jquery');
-var Bootstrap = require('bootstrap');
+var React = require('../react');
+var ReactDOM = require('../react-dom');
+var SearchBar = require('../react-search-bar');
+//var JQuery = require('../jquery');
+//var Bootstrap = require('../bootstrap');
 //var BootstrapDialog = require('bootstrap3-dialog');
 
 var CoordinateCode = React.createClass({
@@ -369,13 +369,13 @@ var EmoUI = React.createClass({
 		});
 	},
 	render: function() {
-		console.log("hello from: " +   window.location.pathname);
+		console.log("hello world from main.js");
 		return (
 			<div>
 				<div className="row">
 					<div className="col-md-6 left">
 						<img src="upload.jpg" width="30%"/>
-					    <div><h2>Datastore</h2></div>
+					    <div><h2>Databus</h2></div>
 						<div className="search-bar">
 							<TablesSearchBar 
 								throttle={1000} 
@@ -383,7 +383,7 @@ var EmoUI = React.createClass({
 								updateDocs={this.handleDocumentListChange} />
 						</div>
 						<div id="current-stuff">
-							Current Table: <input id="current-table" 
+							Current Table: <input id="current-subscription" 
 												value={this.state.currentTableValue} 
 												readOnly
 												onChange={this.onChange}/>
@@ -397,7 +397,7 @@ var EmoUI = React.createClass({
 						            <textarea 
 							            id="edit-value" 
 							            type="text" 
-							            placeholder="once you select a table and a document, delta buttons will appear on the right"
+							            placeholder="once you select a subscription and a document, delta buttons will appear on the right"
 							            value={this.state.currentTextAreaValue}
 							            style={{width: 300, maxHeight: 100}} 
 							            onChange={this.handleTextAreaChange} /><br/>

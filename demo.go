@@ -28,6 +28,7 @@ func main() {
 	http.HandleFunc("/deltatest", handlers.DeltaTestHandler)
 	fmt.Println("got to 1")
 	http.Handle("/", http.FileServer(http.Dir("./public")))
+	http.Handle("/databus", http.StripPrefix("/databus", http.FileServer(http.Dir("./public/databus"))))
 	fmt.Println("got to 2")
 	fmt.Println(PORT)
 	http.ListenAndServe(":" + PORT, nil)

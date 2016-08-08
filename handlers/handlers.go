@@ -171,7 +171,7 @@ func TablesListHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		fmt.Println("got GET request from TablesListHandler")
 		search := r.URL.Query().Get("query")
-		//fmt.Println(search)
+		fmt.Println(search)
 
 		//basics.PrintJSON(Tables_list)
 

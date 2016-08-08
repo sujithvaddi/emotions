@@ -1426,7 +1426,7 @@ var EmoUI = React.createClass({
 		});
 	},
 	render: function () {
-		console.log("hello from: " + window.location.pathname);
+		console.log("hello world from main.js");
 		return React.createElement(
 			'div',
 			null,
@@ -1443,7 +1443,7 @@ var EmoUI = React.createClass({
 						React.createElement(
 							'h2',
 							null,
-							'Datastore'
+							'Databus!!!'
 						)
 					),
 					React.createElement(
@@ -1458,7 +1458,7 @@ var EmoUI = React.createClass({
 						'div',
 						{ id: 'current-stuff' },
 						'Current Table: ',
-						React.createElement('input', { id: 'current-table',
+						React.createElement('input', { id: 'current-subscription',
 							value: this.state.currentTableValue,
 							readOnly: true,
 							onChange: this.onChange }),
@@ -1483,7 +1483,7 @@ var EmoUI = React.createClass({
 							React.createElement('textarea', {
 								id: 'edit-value',
 								type: 'text',
-								placeholder: 'once you select a table and a document, delta buttons will appear on the right',
+								placeholder: 'once you select a subscription and a document, delta buttons will appear on the right',
 								value: this.state.currentTextAreaValue,
 								style: { width: 300, maxHeight: 100 },
 								onChange: this.handleTextAreaChange }),

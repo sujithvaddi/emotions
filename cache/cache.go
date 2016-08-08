@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"net/http"
 	"encoding/json"
+	"io/ioutil"
+	"regexp"
+	"sync"
 
-	"github.com/tchap/go-patricia/patricia"
 	"github.com/andeeliao/structs"
 	"github.com/andeeliao/basics"
+	"github.com/andeeliao/secret"
 	"github.com/jasonlvhit/gocron"
+	"github.com/tchap/go-patricia/patricia"
 )
 
 
@@ -24,12 +28,37 @@ func SetupEmoURL(port string) {
 
 var TableCache *patricia.Trie
 
-func BuildTrie(tables []structs.Table) *patricia.Trie {	
-	trie := patricia.NewTrie()
+func AddToTrie(trieChan chan *patricia.Trie, tableChan chan []structs.Table, wg *sync.WaitGroup) {
+	defer wg.Done()
+	println("adding to ")
+	trie := <- trieChan
+	tables := <- tableChan
+	println(tables)
 	for _, table := range tables {
 		trie.Insert(patricia.Prefix(table.Name), table.Name)
 	}
-	return trie
+
+	trieChan <- trie
+	
+	println("added one")
+}
+
+func GetTablesFromSplit(split string, c chan []structs.Table) {
+	println(split)
+	splitTablesResp, err := http.Get(URL + "/sor/1/_split/__system_sor:table/" + 
+		split +
+		"?APIKey=" + secret.SystemReadKey +
+		"&limit=10000")
+	basics.Check(err)
+
+
+	var tables_list []structs.Table
+ 
+
+	decoder := json.NewDecoder(splitTablesResp.Body)
+	decoder.Decode(&tables_list)
+
+	c <- tables_list
 }
 
 func Search(prefix string) structs.SearchResult {
@@ -43,19 +72,44 @@ func Search(prefix string) structs.SearchResult {
 
 func Populate() {
 	fmt.Println("Populating table")
-	resp, err := http.Get(URL + "/sor/1/_table?limit=1000000000")
+	splitsResp, err := http.Get(URL + "/sor/1/_split/__system_sor:table?APIKey=" + secret.SystemReadKey)
 
-	fmt.Println("Populating table from this URL: " + URL)
+	fmt.Println("get from this: " + URL + "/sor/1/_split/__system_sor:table?APIKey=" + secret.SystemReadKey)
 	basics.Check(err)
-	//defer resp.Body.Close()
-	
-	var Tables_list []structs.Table
-	decoder2 := json.NewDecoder(resp.Body)
-	fmt.Println("made NewDecoder")
-	decoder2.Decode(&Tables_list)
-	fmt.Println("decoded table, building table")
+	defer splitsResp.Body.Close()
 
-	TableCache = BuildTrie(Tables_list)
+	data, _ := ioutil.ReadAll(splitsResp.Body);
+
+	splitsStr := string(data)
+
+	r_splits, err := regexp.Compile("\".+?\"")
+	basics.Check(err)
+	splits_list := r_splits.FindAllString(splitsStr, -1)
+
+
+	var splitsWaitGroup sync.WaitGroup
+	splitsWaitGroup.Add(len(splits_list))
+
+	bufferedTablesChan := make(chan []structs.Table, len(splits_list) + 1)
+
+	bufferedTrieChan := make(chan *patricia.Trie, 2)
+	TableCache = patricia.NewTrie()
+	bufferedTrieChan <- TableCache
+
+
+	println("got to hereeee")
+
+	for _, split := range splits_list {
+		go GetTablesFromSplit(split[1:len(split)-1], bufferedTablesChan)
+
+		go AddToTrie(bufferedTrieChan, bufferedTablesChan, &splitsWaitGroup)
+	}
+
+	println("waiting...")
+
+	splitsWaitGroup.Wait()
+
+
 	fmt.Println("Finished populating table")
 }
 
