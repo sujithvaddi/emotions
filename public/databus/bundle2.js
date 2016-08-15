@@ -1098,6 +1098,57 @@ var PeekList = React.createClass({
 	}
 });
 
+var NavigationBar = React.createClass({
+	displayName: 'NavigationBar',
+
+	render: function () {
+		return React.createElement(
+			'div',
+			null,
+			React.createElement(
+				'nav',
+				{ className: 'navbar navbar-default' },
+				React.createElement(
+					'ul',
+					{ className: 'nav navbar-nav' },
+					React.createElement(
+						'li',
+						{ className: 'non-active' },
+						React.createElement(
+							'a',
+							{ href: '/' },
+							'Datastore',
+							React.createElement(
+								'span',
+								{ className: 'sr-only' },
+								'(current)'
+							)
+						)
+					),
+					React.createElement(
+						'li',
+						{ className: 'active' },
+						React.createElement(
+							'a',
+							{ href: '/databus' },
+							'DataBus'
+						)
+					),
+					React.createElement(
+						'li',
+						{ className: 'non-active' },
+						React.createElement(
+							'a',
+							{ href: '/queue' },
+							'Queue'
+						)
+					)
+				)
+			)
+		);
+	}
+});
+
 var EmoUI = React.createClass({
 	displayName: 'EmoUI',
 
@@ -1154,6 +1205,7 @@ var EmoUI = React.createClass({
 					'div',
 					{ className: 'col-md-6 left' },
 					React.createElement('img', { src: 'upload.jpg', width: '30%' }),
+					React.createElement(NavigationBar, null),
 					React.createElement(
 						'div',
 						null,

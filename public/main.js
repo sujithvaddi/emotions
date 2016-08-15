@@ -278,6 +278,22 @@ var ButtonColumn = React.createClass({
 	}
 });
 
+var NavigationBar = React.createClass({
+	render: function() {
+		return (
+			<div> 
+				<nav className="navbar navbar-default">
+			        <ul className="nav navbar-nav">
+			            <li className="active"><a href="/">Datastore<span className="sr-only">(current)</span></a></li>
+			            <li className="non-active"><a href="/databus">DataBus</a></li>
+			            <li className="non-active"><a href="/queue">Queue</a></li>
+			        </ul>
+				</nav>
+			</div>
+			);
+	}
+});
+
 
 var EmoUI = React.createClass({
 	getInitialState: function() {
@@ -410,8 +426,8 @@ var EmoUI = React.createClass({
 			<div>
 				<div className="row">
 					<div className="col-md-6 left">
-						<img src="upload.jpg" width="30%"/>
-					    <div><h2>Datastore</h2></div>
+						<img src="upload.jpg" width="30%" alt="Bazaarvoice"/>
+						<NavigationBar />
 					    <div><h3>API Key:</h3><input
 												value={this.state.userAPIKey}
 									            style={{width: 50 + "%"}}
@@ -437,7 +453,7 @@ var EmoUI = React.createClass({
 						<div id="content5">
 						      <form><h2>Editable value:</h2><br/>
 						            <textarea 
-							            id="edit-value" 
+							            className="edit-value" 
 							            type="text" 
 							            placeholder="once you select a table and a document, delta buttons will appear on the right"
 							            value={this.state.currentTextAreaValue}

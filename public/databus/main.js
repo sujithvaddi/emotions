@@ -42,6 +42,22 @@ var PeekList = React.createClass({
 	}
 });
 
+var NavigationBar = React.createClass({
+	render: function() {
+		return (
+			<div> 
+				<nav className="navbar navbar-default">
+			        <ul className="nav navbar-nav">
+			            <li className="non-active"><a href="/">Datastore<span className="sr-only">(current)</span></a></li>
+			            <li className="active"><a href="/databus">DataBus</a></li>
+			            <li className="non-active"><a href="/queue">Queue</a></li>
+			        </ul>
+				</nav>
+			</div>
+			);
+	}
+});
+
 
 var EmoUI = React.createClass({
 	getInitialState: function() {
@@ -92,6 +108,7 @@ var EmoUI = React.createClass({
 				<div className="row">
 					<div className="col-md-6 left">
 						<img src="upload.jpg" width="30%"/>
+						<NavigationBar />
 					    <div><h2>Databus</h2></div>
 						<div id="current-stuff">
 							Current subscription: <input id="current-key" 

@@ -41,7 +41,7 @@ func DecryptKey() {
 
     KEY = string(decrypted)
 
-    fmt.Printf("%v decrypt to %s\n", secret.SystemReadKey, decrypted)
+    fmt.Printf("%v decrypted", secret.SystemReadKey)
 }
 
 func SetupEmoURL(port string) {
