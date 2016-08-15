@@ -107,7 +107,7 @@ var EmoUI = React.createClass({
 			<div>
 				<div className="row">
 					<div className="col-md-6 left">
-						<img src="upload.jpg" width="30%"/>
+						<img src="../upload.jpg" width="30%"/>
 						<NavigationBar />
 					    <div><h2>Databus</h2></div>
 						<div id="current-stuff">

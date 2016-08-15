@@ -1204,7 +1204,7 @@ var EmoUI = React.createClass({
 				React.createElement(
 					'div',
 					{ className: 'col-md-6 left' },
-					React.createElement('img', { src: 'upload.jpg', width: '30%' }),
+					React.createElement('img', { src: '../upload.jpg', width: '30%' }),
 					React.createElement(NavigationBar, null),
 					React.createElement(
 						'div',

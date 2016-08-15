@@ -21887,7 +21887,7 @@ var EmoUI = React.createClass({
 				React.createElement(
 					'div',
 					{ className: 'col-md-6 left' },
-					React.createElement('img', { src: 'upload.jpg', width: '30%' }),
+					React.createElement('img', { src: '../upload.jpg', width: '30%' }),
 					React.createElement(NavigationBar, null),
 					React.createElement(
 						'div',
@@ -21904,7 +21904,7 @@ var EmoUI = React.createClass({
 						'Current queue: ',
 						React.createElement('input', { id: 'current-key',
 							style: { width: 50 + "%" },
-							placeholder: 'enter queue name (will create a new queue if doesn\'t already exist)',
+							placeholder: 'enter queue name',
 							value: this.state.currentQueueValue,
 							onChange: this.handleQueueUpdate }),
 						React.createElement(
