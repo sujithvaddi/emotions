@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"regexp"
 	"sync"
+    "crypto/aes"
+    "crypto/cipher"
 
 	"github.com/andeeliao/structs"
 	"github.com/andeeliao/basics"
@@ -17,6 +19,30 @@ import (
 
 
 var URL string 
+
+var KEY string 
+
+func DecryptKey() {
+	key := "EMOtions08152016" // 16 bytes!
+
+    block,err := aes.NewCipher([]byte(key))
+    basics.Check(err)
+
+    // 16 bytes for AES-128, 24 bytes for AES-192, 32 bytes for AES-256
+    ciphertext := []byte("abcdef1234567890") 
+    iv := ciphertext[:aes.BlockSize] // const BlockSize = 16
+
+    // decrypt
+
+    decrypter := cipher.NewCFBDecrypter(block, iv) // simple!
+
+    decrypted := make([]byte, 48)
+    decrypter.XORKeyStream(decrypted, secret.SystemReadKey)
+
+    KEY = string(decrypted)
+
+    fmt.Printf("%v decrypt to %s\n", secret.SystemReadKey, decrypted)
+}
 
 func SetupEmoURL(port string) {
  	if port == "8001" {
@@ -30,31 +56,24 @@ var TableCache *patricia.Trie
 
 func AddToTrie(trieChan chan *patricia.Trie, tableChan chan []structs.Table, wg *sync.WaitGroup) {
 	defer wg.Done()
-	println("adding to ")
 	trie := <- trieChan
 	tables := <- tableChan
-	println(tables)
 	for _, table := range tables {
 		trie.Insert(patricia.Prefix(table.Name), table.Name)
 	}
 
 	trieChan <- trie
-	
-	println("added one")
 }
 
 func GetTablesFromSplit(split string, c chan []structs.Table) {
-	println(split)
 	splitTablesResp, err := http.Get(URL + "/sor/1/_split/__system_sor:table/" + 
 		split +
-		"?APIKey=" + secret.SystemReadKey +
+		"?APIKey=" + KEY +
 		"&limit=10000")
 	basics.Check(err)
 
-
 	var tables_list []structs.Table
  
-
 	decoder := json.NewDecoder(splitTablesResp.Body)
 	decoder.Decode(&tables_list)
 
@@ -64,17 +83,17 @@ func GetTablesFromSplit(split string, c chan []structs.Table) {
 func Search(prefix string) structs.SearchResult {
 	var results structs.SearchResult
 	TableCache.VisitSubtree(patricia.Prefix(prefix), results.AppendTo)
-	if len(results.Result) > 5 {
-		results.Result = results.Result[:5]
+	if len(results.Result) > 10 {
+		results.Result = results.Result[:10]
 	}
 	return results
 }
 
 func Populate() {
 	fmt.Println("Populating table")
-	splitsResp, err := http.Get(URL + "/sor/1/_split/__system_sor:table?APIKey=" + secret.SystemReadKey)
+	splitsResp, err := http.Get(URL + "/sor/1/_split/__system_sor:table?APIKey=" + KEY)
 
-	fmt.Println("get from this: " + URL + "/sor/1/_split/__system_sor:table?APIKey=" + secret.SystemReadKey)
+	fmt.Println("get from this: " + URL + "/sor/1/_split/__system_sor:table?APIKey=" + KEY)
 	basics.Check(err)
 	defer splitsResp.Body.Close()
 

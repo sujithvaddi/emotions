@@ -10,6 +10,7 @@ div.tabContent { border: 1px solid #c9c3ba; padding: 0.5em; background-color: #f
 div.tabContent.hide { display: none; }
 
 
+textarea#edit-value.error{border: 2px solid #f00;}
 ul {
     list-style-type: none;
     margin: 0;
@@ -93,6 +94,11 @@ h1{
 h2{
   color:#06b9a7;
   font-size:25px;
+}
+
+h3{
+  color:#06b9a7;
+  font-size:20px;
 }
 
 .search-bar-input{
