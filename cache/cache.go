@@ -23,25 +23,19 @@ var URL string
 var KEY string 
 
 func DecryptKey() {
-	key := "EMOtions08152016" // 16 bytes!
+	key := "EMOtions08152016" 
 
     block,err := aes.NewCipher([]byte(key))
     basics.Check(err)
-
-    // 16 bytes for AES-128, 24 bytes for AES-192, 32 bytes for AES-256
     ciphertext := []byte("abcdef1234567890") 
-    iv := ciphertext[:aes.BlockSize] // const BlockSize = 16
+    iv := ciphertext[:aes.BlockSize] 
 
-    // decrypt
-
-    decrypter := cipher.NewCFBDecrypter(block, iv) // simple!
+    decrypter := cipher.NewCFBDecrypter(block, iv) 
 
     decrypted := make([]byte, 48)
     decrypter.XORKeyStream(decrypted, secret.SystemReadKey)
 
     KEY = string(decrypted)
-
-    fmt.Printf("%v decrypted", secret.SystemReadKey)
 }
 
 func SetupEmoURL(port string) {
@@ -92,8 +86,6 @@ func Search(prefix string) structs.SearchResult {
 func Populate() {
 	fmt.Println("Populating table")
 	splitsResp, err := http.Get(URL + "/sor/1/_split/__system_sor:table?APIKey=" + KEY)
-
-	fmt.Println("get from this: " + URL + "/sor/1/_split/__system_sor:table?APIKey=" + KEY)
 	basics.Check(err)
 	defer splitsResp.Body.Close()
 
@@ -115,9 +107,6 @@ func Populate() {
 	TableCache = patricia.NewTrie()
 	bufferedTrieChan <- TableCache
 
-
-	println("got to hereeee")
-
 	for _, split := range splits_list {
 		go GetTablesFromSplit(split[1:len(split)-1], bufferedTablesChan)
 
@@ -127,14 +116,11 @@ func Populate() {
 	println("waiting...")
 
 	splitsWaitGroup.Wait()
-
-
 	fmt.Println("Finished populating table")
 }
 
 func Schedule() {
 	gocron.Every(1).Hour().Do(Populate)
-
 	go func() {
 		<- gocron.Start()
 	}()
