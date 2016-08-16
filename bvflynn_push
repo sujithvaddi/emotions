@@ -2,4 +2,4 @@ export BVFLYNN_TEAM='emodb_dev@bazaarvoice.com'
 export BVFLYNN_APP='emo_ui'
 export BVFLYNN_ENDPOINT='qa-us-east-1'
 bvflynn push
-echo "!!!!!!!!!!!!!!!!!!!!!!after errors"
+flynn -a qa-us-east-1 env set GODEBUG=netdns=cgo

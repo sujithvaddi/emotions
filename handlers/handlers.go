@@ -4,15 +4,152 @@ import (
 	"fmt"
 	"net/http"
 	"io"
-	//"io/ioutil"
+	"io/ioutil"
 	"strings"
 	"encoding/json"
+	"strconv"
 
 	"github.com/andeeliao/basics"
 	"github.com/andeeliao/structs"
 	"github.com/andeeliao/deltas"
 	"github.com/andeeliao/cache"
 )
+
+func QueueMessageHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("inside QueueMessageHandler")
+	switch r.Method {
+	case "POST":
+		var message structs.QueueMessage 
+		decoder:= json.NewDecoder(r.Body)
+		decoder.Decode(&message)
+		fmt.Println(message)
+
+		sendURL := cache.URL + "/queue/1/_sendbatch"
+		data_binary := "{\"" + message.Queue + "\":[" + strings.Join(message.Messages, ",") + "]}"
+		fmt.Println(data_binary)
+		resp_message, err := http.Post(sendURL, "application/json", strings.NewReader(data_binary))
+		basics.Check(err)
+
+		/*b := ioutil.ReadAll(resp_message.Body)
+		fmt.Println(string(b))*/
+
+		io.Copy(w, resp_message.Body)
+
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
+
+	}
+}
+
+func QueueHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("inside QueueHandler")
+	switch r.Method {
+	case "GET":
+		queue := r.URL.Query().Get("queue")
+		fmt.Println(queue)
+		resp_size, err := http.Get(cache.URL + "/queue/1/" + queue + "/size")
+		basics.Check(err)
+
+		queque_bytes, err := ioutil.ReadAll(resp_size.Body)
+		queque_size, err := strconv.ParseUint(string(queque_bytes), 10, 64)
+
+		resp_claim, err := http.Get(cache.URL + "/queue/1/" + queue + "/claimcount")
+		basics.Check(err) 
+
+		queue_bytes_claimcount, err := ioutil.ReadAll(resp_claim.Body)
+		queue_claimcount, err := strconv.ParseUint(string(queue_bytes_claimcount), 10, 64)
+
+		info := structs.QueueInfo{Name: queue, Size: queque_size, ClaimCount: queue_claimcount}
+
+		resp_peek, err := http.Get(cache.URL + "/queue/1/" + queue + "/peek")
+		peek_bytes, err := ioutil.ReadAll(resp_peek.Body)
+
+		peek_string := string(peek_bytes)
+		info.Peek = peek_string
+
+		encoded, err := json.Marshal(info)
+		w.Write(encoded)
+
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
+	}
+	
+}
+
+
+func SubscriptionHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("inside SubscriptionHandler")
+	switch r.Method{
+	case "GET":
+		subscription := r.URL.Query().Get("subscription")
+		fmt.Println(subscription)
+
+		resp, err := http.Get(cache.URL + "/bus/1/" + subscription)
+		basics.Check(err)
+
+		var info structs.SubscriptionInfo
+		decoder := json.NewDecoder(resp.Body)
+		decoder.Decode(&info)
+		fmt.Println(info)
+
+		resp_size, err := http.Get(cache.URL + "/bus/1/" + subscription + "/size")
+		basics.Check(err)
+
+		size_bytes, err := ioutil.ReadAll(resp_size.Body)
+		basics.Check(err)
+		size_string := string(size_bytes)
+
+		size, err := strconv.ParseUint(size_string, 10, 64)
+		basics.Check(err)
+
+		fmt.Println(size)
+
+
+		resp_claim, err := http.Get(cache.URL + "/bus/1/" + subscription + "/claimcount")
+		claim_bytes, err := ioutil.ReadAll(resp_claim.Body)
+		basics.Check(err)
+		claim_string := string(claim_bytes)
+
+		claims, err := strconv.ParseUint(claim_string, 10, 64)
+		basics.Check(err)
+
+		info.EventCount = size
+		info.ClaimCount = claims
+
+		resp_peek, err := http.Get(cache.URL + "/bus/1/" + subscription + "/peek")
+		peek_bytes, err := ioutil.ReadAll(resp_peek.Body)
+
+		peek_string := string(peek_bytes)
+		info.Peek = peek_string
+
+		encoded, err := json.Marshal(info)
+		w.Write(encoded)
+
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
+	}
+	
+}
+
+
+func SearchCoordinateHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("insider SearchCoordinateHandler")
+	switch r.Method{
+	case "POST":
+		//stuff
+		var coord structs.Coordinate 
+		decoder := json.NewDecoder(r.Body)
+		decoder.Decode(&coord)
+		fmt.Println(coord)
+
+		resp, err := http.Get(cache.URL + "/sor/1/" + coord.Table + "/" + coord.TableKey)
+		basics.Check(err)
+
+		io.Copy(w, resp.Body)
+	default:
+		http.Error(w, fmt.Sprintf("Unsupported method: %s", r.Method), http.StatusMethodNotAllowed)
+	}
+}
 
 
 func ButtonsHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,12 +191,10 @@ func DeltaTestHandler(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		decoder.Decode(&test)
 
-		fmt.Println("test: ", test)
-
-		details := "/sor/1/emouitesttable/testdelta?audit=comment:'testing',host:aws-cms-01"
-		_, err := http.Post(cache.URL + details, "application/x.json-delta", strings.NewReader(test.Original))
+		sendURL := cache.URL + "/sor/1/emouitesttable/testdelta?audit=comment:'testing',host:aws-cms-01"
+		_, err := http.Post(sendURL, "application/x.json-delta", strings.NewReader(test.Original))
 		basics.Check(err)
-		_, err2 := http.Post(cache.URL + details, "application/x.json-delta", strings.NewReader(test.Delta))
+		_, err2 := http.Post(sendURL, "application/x.json-delta", strings.NewReader(test.Delta))
 		basics.Check(err2)
 
 		
@@ -129,23 +264,20 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 		var edit structs.DeltaEdit
 		decoder := json.NewDecoder(r.Body)
 		decoder.Decode(&edit)
+		fmt.Println(edit)
 
 
 		//writes to emodb, should be conditional, or maybe move other stuff to outside of ReviewsHandler
-		details := "/sor/1/" + edit.Table + "/" + edit.TableKey + "?audit=comment:'edit',host:aws-cms-01"
+		details := "/sor/1/" + edit.Table + "/" + edit.TableKey + "?audit=comment:'edit',host:aws-cms-01" + "&APIKey=" + edit.APIKey
+		fmt.Println("details: " + details)
 		resp, err := http.Post(cache.URL + details, "application/x.json-delta", strings.NewReader(edit.Delta))
 		basics.Check(err)
 
-		var success structs.SuccessResponse
-		decoder2 := json.NewDecoder(resp.Body)
-		decoder2.Decode(&success)
+		/*data, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println("data: " + string(data))*/
+		
 
-		fmt.Println(success)
-		//need to go back and send this to client so it knows success status
-
-
-		w.Header().Set("Content-Type", "text/plain")
-		//io.Copy(w, strings.NewReader(deltas.Map(data)))
+		io.Copy(w, resp.Body)
 
 	case "GET":
 		tableName := r.URL.Query().Get("tableName")
@@ -171,7 +303,7 @@ func TablesListHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		fmt.Println("got GET request from TablesListHandler")
 		search := r.URL.Query().Get("query")
-		//fmt.Println(search)
+		fmt.Println(search)
 
 		//basics.PrintJSON(Tables_list)
 

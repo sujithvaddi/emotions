@@ -1,6 +1,25 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
-var SearchBar = require('react-search-bar')
+var SearchBar = require('react-search-bar');
+var JQuery = require('jquery');
+var Bootstrap = require('bootstrap');
+//var BootstrapDialog = require('bootstrap3-dialog');
+
+
+var deltaButtons = [
+	{"name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}"},
+	{"name": "Literal", "title": "create a literal delta e.g. {\"author\":\"Bob\"}"},
+	{"name": "Delete Document", "title": "delete the whole document"},
+	{"name": "Delete Key", "title": "delete one key-value pair"},
+	{"name": "Nest", "title": "nests a delta e.g. "}
+]
+
+var condtionalButtons = [
+	{"name": "Make Conditional", "title": "makes delta conditional e.g {..,\"author\":\"Bob\"} -> if [insert condition delta] then {..,\"author\":\"Bob\"} end"},
+	{"name": "Noop", "title": "delta that does nothing. if [insert condition delta] then <b>{..,\"author\":\"Bob\"}</b> end -> if [insert condition delta] then .. end." },
+	{"name": "True", "title": "replaces selected with delta true condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysTrue() then .. end"},
+	{"name": "False", "title": "replaces selected with delta false condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysFalse() then .. end"}
+]
 
 var CoordinateCode = React.createClass({
 	render: function() {
@@ -138,22 +157,6 @@ var CoordinateList = React.createClass({
 	}
 });
 
-
-var deltaButtons = [
-	{"name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}"},
-	{"name": "Literal", "title": "create a literal delta e.g. {\"author\":\"Bob\"}"},
-	{"name": "Delete Document", "title": "delete the whole document"},
-	{"name": "Delete Key", "title": "delete one key-value pair"},
-	{"name": "Nest", "title": "nests a delta e.g. "}
-]
-
-var condtionalButtons = [
-	{"name": "Make Conditional", "title": "makes delta conditional e.g {..,\"author\":\"Bob\"} -> if [insert condition delta] then {..,\"author\":\"Bob\"} end"},
-	{"name": "Noop", "title": "delta that does nothing. if [insert condition delta] then <b>{..,\"author\":\"Bob\"}</b> end -> if [insert condition delta] then .. end." },
-	{"name": "True", "title": "replaces selected with delta true condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysTrue() then .. end"},
-	{"name": "False", "title": "replaces selected with delta false condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysFalse() then .. end"}
-]
-
 var DeltaButton = React.createClass({
 	handleClick: function() {
 		var text = $("#edit-value").selection();
@@ -224,7 +227,7 @@ const TablesSearchBar = React.createClass({
 			url: '/tables',
 			data: {query: input},
 			success: function(results) {
-				resolve(results.Result);
+				resolve(results.result);
 			},
 			error: function (error) {
 				alert ('error with getting tables search results:', error);
@@ -275,6 +278,23 @@ var ButtonColumn = React.createClass({
 	}
 });
 
+var NavigationBar = React.createClass({
+	render: function() {
+		return (
+			<div> 
+				<nav className="navbar navbar-default">
+			        <ul className="nav navbar-nav">
+			            <li className="active"><a href="/">Datastore<span className="sr-only">(current)</span></a></li>
+			            <li className="non-active"><a href="/databus">DataBus</a></li>
+			            <li className="non-active"><a href="/queue">Queue</a></li>
+			        </ul>
+				</nav>
+			</div>
+			);
+	}
+});
+
+
 var EmoUI = React.createClass({
 	getInitialState: function() {
 		return {
@@ -282,11 +302,79 @@ var EmoUI = React.createClass({
 			currentKeyValue: "select a document to edit",
 			currentTextAreaValue: "",
 			documentList: [],
-			currentEditDocument: {}
+			currentEditDocument: {},
+			userAPIKey: ""
 		};
 	},
-	componentDidMount: function() {
-
+	sendTestDelta: function() {
+		var delta = this.state.currentTextAreaValue;
+		var jsonStr = $("#" + $('#current-key').val()).text();
+		var data = {
+			"delta": delta,
+			"original": jsonStr
+		};
+		var json = JSON.stringify(data)
+		$.ajax({
+			type: 'POST',
+			url: '/deltatest',
+			data: json,
+			success: function(data) {
+				$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
+				$('#test-delta-result').empty().append('<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
+			},
+			error: function(err) {
+				alert("error with test send");
+			}
+		});
+	},
+	sendDelta: function() {
+		if (this.state.userAPIKey == "") {
+			alert("Please enter a valid API Key");
+			return
+		};
+		var data = {
+			"delta": this.state.currentTextAreaValue,
+			"table": this.state.currentTableValue,
+			"tableKey": this.state.currentKeyValue,
+			"APIKey": this.state.userAPIKey
+		};
+		var json = JSON.stringify(data);
+		$.ajax({
+			type: "POST",
+			url: "/reviews",
+			data: json,
+			success: function(data) {
+				console.log(data);
+				$('#original-delta').empty();
+				$('#test-delta-result').empty();
+				if (data == "{\"success\":true}") {
+					alert("success making changes!");
+				} else {
+					alert("update was not successful: " + data);
+				}
+			},
+			error: function(err) {
+				alert("error: " + err);
+			}
+		});
+	},
+	findCoordinate: function() {
+		var data = {
+			"table": this.state.currentTableValue,
+			"tableKey": this.state.currentKeyValue
+		};
+		var json = JSON.stringify(data);
+		$.ajax({
+			type: "POST",
+			url: "/searchcoordinate",
+			data: json,
+			success: function(data) {
+				this.handleDocumentListChange([JSON.parse(data)]);
+			}.bind(this),
+			error: function(err) {
+				alert(err);
+			}
+		});
 	},
 	handleTableChange: function(table) {
 		this.setState({
@@ -318,47 +406,19 @@ var EmoUI = React.createClass({
 			currentEditDocument: doc
 		});
 	},
-	componentDidMount: function() {
-		$('#test-result').on('click', function() {
-			var delta = $('#edit-value').val();
-			var jsonStr = $("#" + $('#current-key').val()).text();
-			var data = {
-				"delta": delta,
-				"original": jsonStr
-			};
-			var json = JSON.stringify(data)
-			$.ajax({
-				type: 'POST',
-				url: '/deltatest',
-				data: json,
-				success: function(data) {
-					$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
-					$('#test-delta-result').empty().append('<pre><code>' + JSON.stringify(data, null, 4) + '</code></pre>');
-				},
-				error: function(err) {
-					alert("error with test send");
-				}
-			});
+	handleAPIKeyChange: function(event) {
+		this.setState({
+			userAPIKey: event.target.value
 		});
-
-		$('#send-delta').on('click', function() {
-			var delta = $('#edit-value').val();
-			var table = $('#current-table').val();
-			var tableKey = $('#current-key').val();
-			var data = {
-				"delta": delta,
-				"table": table,
-				"tableKey": tableKey
-			};
-			var json = JSON.stringify(data);
-			$.ajax({
-				type: "POST",
-				url: "/reviews",
-				data: json,
-				success: function(data) {
-					//return some data, print a success statement 
-				}
-			});
+	},
+	handleCurrenTableChange: function(event) {
+		this.setState({
+			currentTableValue: event.target.value
+		});
+	},
+	handleCurrentKeyChange: function(event) {
+		this.setState({
+			currentKeyValue: event.target.value
 		});
 	},
 	render: function() {
@@ -366,7 +426,13 @@ var EmoUI = React.createClass({
 			<div>
 				<div className="row">
 					<div className="col-md-6 left">
-						<img src="upload.jpg" width="30%"/>
+						<img src="upload.jpg" width="30%" alt="Bazaarvoice"/>
+						<NavigationBar />
+					    <div><h3>API Key:</h3><input
+												value={this.state.userAPIKey}
+									            style={{width: 50 + "%"}}
+												placeholder="please enter your API key here"
+												onChange={this.handleAPIKeyChange}/></div>
 						<div className="search-bar">
 							<TablesSearchBar 
 								throttle={1000} 
@@ -375,24 +441,27 @@ var EmoUI = React.createClass({
 						</div>
 						<div id="current-stuff">
 							Current Table: <input id="current-table" 
+									            style={{width: 50 + "%"}}
 												value={this.state.currentTableValue} 
-												onChange={this.onChange}/>
+												onChange={this.handleCurrenTableChange}/><br/>
 							Current Key: <input id="current-key" 
+									            style={{width: 50 + "%"}}
 												value={this.state.currentKeyValue} 
-												onChange={this.onChange} />
+												onChange={this.handleCurrentKeyChange} />
+							<button className="btn btn-default" type="button" onClick={this.findCoordinate}>Find Document</button>
 						</div>
 						<div id="content5">
 						      <form><h2>Editable value:</h2><br/>
 						            <textarea 
-							            id="edit-value" 
+							            className="edit-value" 
 							            type="text" 
 							            placeholder="once you select a table and a document, delta buttons will appear on the right"
 							            value={this.state.currentTextAreaValue}
 							            style={{width: 300, maxHeight: 100}} 
 							            onChange={this.handleTextAreaChange} /><br/>
 						      Options:
-						            <button className="btn btn-default" id="test-result" type="button">See Test Result</button>
-						            <button className="btn btn-default" id="send-delta" type="button">Send Update</button><br/>
+						            <button className="btn btn-default" id="test-result" type="button" onClick={this.sendTestDelta}>See Test Result</button>
+						            <button className="btn btn-default" id="send-delta" type="button" onClick={this.sendDelta}>Send Update</button><br/>
 						      </form>
 						</div>
 		                <div id="edit-document-container">
