@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	
-	"github.com/andeeliao/structs"
+	"github.com/EMOtions/structs"
 )
 
 //turns a struct into the specified delta 

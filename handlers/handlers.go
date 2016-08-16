@@ -9,10 +9,10 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/andeeliao/basics"
-	"github.com/andeeliao/structs"
-	"github.com/andeeliao/deltas"
-	"github.com/andeeliao/cache"
+	"github.com/EMOtions/basics"
+	"github.com/EMOtions/structs"
+	"github.com/EMOtions/deltas"
+	"github.com/EMOtions/cache"
 )
 
 func QueueMessageHandler(w http.ResponseWriter, r *http.Request) {

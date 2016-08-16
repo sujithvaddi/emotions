@@ -10,9 +10,9 @@ import (
     "crypto/aes"
     "crypto/cipher"
 
-	"github.com/andeeliao/structs"
-	"github.com/andeeliao/basics"
-	"github.com/andeeliao/secret"
+	"github.com/EMOtions/structs"
+	"github.com/EMOtions/basics"
+	"github.com/EMOtions/secret"
 	"github.com/jasonlvhit/gocron"
 	"github.com/tchap/go-patricia/patricia"
 )
