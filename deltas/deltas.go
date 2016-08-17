@@ -8,11 +8,6 @@ import (
 	"github.com/EMOtions/structs"
 )
 
-//turns a struct into the specified delta 
-
-//turns DeltaConstructorData into a map delta
-
-
 
 func Map(data structs.DeltaConstructorData) string {
 	deltaMap := splitIntoKeyValue(data.Value)
@@ -58,6 +53,7 @@ func AlwaysFalse(data structs.DeltaConstructorData) string {
 	return "alwaysFalse()"
 }
 
+//splits a delta string to extract key and value to construct another delta
 func splitIntoKeyValue(delta string) (deltaMap map[string]string) {
 	deltaMap = make(map[string]string)
 
@@ -78,7 +74,7 @@ func splitIntoKeyValue(delta string) (deltaMap map[string]string) {
 	
 }
 
-
+//hacky way of deciding whether to add quotes when reconstructing a delta
 func AddQuotes(val string) string {
 	if val == "true" || val == "false" {
 		return val

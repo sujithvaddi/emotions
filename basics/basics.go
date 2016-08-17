@@ -2,8 +2,8 @@
 package basics
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	)
 
 func Check(e error) {
@@ -12,6 +12,7 @@ func Check(e error) {
 	}
 }
 
+//unmarshals any generic json object
 func PrintJSON(v interface{}) {
 	encoded, err := json.Marshal(v)
 	Check(err)

@@ -1,8 +1,8 @@
+//all structs used to marshal and unmarshal json
+//whitespace between : and "jsonannocation" could potentially cause problems
 package structs
 
 import (
-	//"fmt"
-	
 	"github.com/tchap/go-patricia/patricia"
 )
 

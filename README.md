@@ -4,7 +4,6 @@ A UI to explore EMOdb content and functionality
 
 ##Quick Start
 
-
 Deployed:
 [Cert](http://emotions.flynn-qa-us-east-1.nexus.bazaarvoice.com/)
 
@@ -23,7 +22,7 @@ $ go run server.go local
 4. Check [http://localhost:8001/](http://localhost:8001/)
 
 
-##Deploy
+##Deployment
 To deploy, run the bvflynn_push script.
 ```
 $ ./bvflynn_push
@@ -37,7 +36,9 @@ $ flynn -a qa-us-east-1 env set GODEBUG=netdns=cgo
 
 If updating an instance that's already running, the variable should already be set.
 
-Flynn deployments have a tendency to fail the first couple of times, sometimes with a generic fail message (ERROR: Initial web job failed to start). Try 2-3 times, wait an hour in between, try again, wait a day, try again (this has sometimes worked in the past). Logs can be viewed with one of:
+Flynn deployments have a tendency to fail the first couple of times, sometimes with a generic fail message (ERROR: Initial web job failed to start). Try 2-3 times, wait an hour in between, try again, wait a day, try again (this has sometimes worked in the past). 
+
+Flynn takes print statements and logs them. Logs can be viewed with one of:
 
 ```
 $ flynn log
@@ -53,10 +54,28 @@ web: [binary file] $PORT
 The binary file name is the compiled file in $GOPATH/bin. It should be the name of the folder the project is in. 
 
 
+##Tools 
+[Go](https://golang.org/doc/install): Server 
+[Godep](https://github.com/tools/godep): Golang dependency management tool. EMOtions relies on go-patricia (radix trie) for search and gocron for cron jobs. 
+[npm](https://docs.npmjs.com/cli/install): Javascript package management tool
+[Browserify](http://browserify.org/): Front-end dependency management tool. Enables 'requires' statements for importing dependencies.
+[React](https://facebook.github.io/react/)
+[React developer tool](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi): React inspector tool. Useful for current state, props, and other react specific parameters that the regular browser inspector can't detect. 
+jQuery
+
+
 ##Client 
 All client side code is in the public folder.
 
-Make javascript edits to the respective page's main.js file, then build with npm build inside the /public directory (if this doesn't directly run the browserify build commands which can be found inside the package.json file). This will update the bundle[n].js file, which index.html sources. 
+###Building bundle.js
+
+Make javascript edits to the respective page's main.js file, then build with npm build inside the /public directory (if this doesn't directly run the browserify build commands which can be found inside the package.json file):
+
+```
+$ npm run build
+```
+
+This will update the bundle[n].js file, which index.html sources. 
 
 To install Browserify:
 ```
@@ -65,16 +84,28 @@ npm install -g browserify
 
 Pages are slow to load because all the code renders on client side, server side rendering would speed up page load. 
 
+React-search-bar is not the default src from github as that version did not have search on enter functionality. If this dependency is updated, the functionality might break. 
+
+Dependencies are located in the package.json file. 
+
+###React Notes
+React component inner function sometimes require binding or passing in 'this' parameter to use defined functions, props and state. For example, ajax calls require binding 'this' for success calls, and any calls to map requires 'this' to be passed in as a second parameter. 
+
+React components are ALWAYS required to be closed with a '/', including native html elements '<br>', which needs to be corrected to '<br/>'. 
+
+The EmoUI component passes a lot of functions down so child nodes can change state that are eventually rendered by other child nodes. This would've been much better managed with a Flux implementation such as [Redux](https://github.com/reactjs/redux).
+
 
 ##Server
 Server runs locally by checking for the 'local' argument. 
 
 Cert URLs used are in cache/cache.go file, which should be edited for deployment to other environments. EMOtions uses a check to see if PORT# is 8001 to use public URLs. EMOtions will not work if deployed to flynn sbx endpoint, because that endpoint has no access to private or public VPC. 
 
-##Tools 
-[Go](https://golang.org/doc/install): Server 
-[Godep](https://github.com/tools/godep): Golang dependency management tool. EMOtions relies on go-patricia (radix trie) for search and gocron for cron jobs. 
-[npm](https://docs.npmjs.com/cli/install): Javascript package management tool
-[Browserify](http://browserify.org/): Front-end dependency management tool. Enables 'requires' statements for importing dependencies.
-[React](https://facebook.github.io/react/)
-jQuery
+###Go Notes
+Go json unmarshals will sometimes return empty structs if the annotations has a space after the colon ":" e.g. `json: "queue"` will sometimes break.
+
+Unbuffered channels pause the program until they're emptied. When a buffered channel is full it will also pause the program.
+
+
+##Credits
+Krystina Diao for most of the CSS and the overall design.

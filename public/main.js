@@ -21,14 +21,7 @@ var condtionalButtons = [
 	{"name": "False", "title": "replaces selected with delta false condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysFalse() then .. end"}
 ]
 
-var CoordinateCode = React.createClass({
-	render: function() {
-		return (
-			<pre><code id={this.props.coordID}>{this.props.codeStr}</code></pre>
-			);
-	}
-});
-
+//edit button for a key-value pair in the json document
 var GenericEditButton = React.createClass({
 	editTextArea: function() {
 		$.ajax({
@@ -42,6 +35,7 @@ var GenericEditButton = React.createClass({
 			success: function(value) {
 				this.props.changeTextArea(value);
 			}.bind(this),
+			//binds of some sort are required to use 'this' object in non-top level functions (e.g. ajax calls, maps)
 			error: function(err) {
 				alert("error from GenericEditButton: " + err);
 			}
@@ -58,6 +52,7 @@ var GenericEditButton = React.createClass({
 	}
 });
 
+//recursively parses the json to generate the edit buttons
 var EditButtons = React.createClass({
 	render: function() {
 		var editButtons = [];
@@ -105,6 +100,7 @@ var EditButtons = React.createClass({
 	}
 });
 
+//generate all the key-value pairs for the specified document
 var CoordinateEditButton = React.createClass({
 	startEditing: function () {
 		var docName = this.props.coordID;
@@ -115,6 +111,15 @@ var CoordinateEditButton = React.createClass({
 		var buttonText = "EDIT: " + this.props.coordID;
 		return (
 			<button className={"btn btn-default"} type="button" onClick={this.startEditing}>{buttonText}</button>
+			);
+	}
+});
+
+
+var CoordinateCode = React.createClass({
+	render: function() {
+		return (
+			<pre><code id={this.props.coordID}>{this.props.codeStr}</code></pre>
 			);
 	}
 });
@@ -138,6 +143,8 @@ var Coordinate = React.createClass({
 	}
 });
 
+
+//creates the list of documents shown when searching for a table
 var CoordinateList = React.createClass({
 	render: function() {
 		var coords = this.props.data.map(
@@ -153,10 +160,12 @@ var CoordinateList = React.createClass({
 				);
 		},
 		this);
+		//pass in this to maps to bind 'this'
 		return (<div>{coords}</div>);
 	}
 });
 
+//const edit buttons on the right that toggles in between the different deltas
 var DeltaButton = React.createClass({
 	handleClick: function() {
 		var text = $("#edit-value").selection();
@@ -220,6 +229,7 @@ var ButtonList = React.createClass({
 	}
 });
 
+//search bar for table 
 const TablesSearchBar = React.createClass({
 	onChange: function(input, resolve) {
 		$.ajax({
@@ -242,7 +252,7 @@ const TablesSearchBar = React.createClass({
 			url: '/reviews',
 			data: {tableName: input},
 			success: function(docs) {
-				this.props.updateDocs(docs);
+				this.props.updateDocs(JSON.parse(docs));
 			}.bind(this),
 			error: function (error) {
 				alert('error with getting docs!');
@@ -294,7 +304,7 @@ var NavigationBar = React.createClass({
 	}
 });
 
-
+//page 
 var EmoUI = React.createClass({
 	getInitialState: function() {
 		return {
@@ -306,6 +316,7 @@ var EmoUI = React.createClass({
 			userAPIKey: ""
 		};
 	},
+	//sends the test delta to server, which will format and forward to emo
 	sendTestDelta: function() {
 		var delta = this.state.currentTextAreaValue;
 		var jsonStr = $("#" + $('#current-key').val()).text();
@@ -327,6 +338,7 @@ var EmoUI = React.createClass({
 			}
 		});
 	},
+	//sends data to server that will route the update request to the specified document
 	sendDelta: function() {
 		if (this.state.userAPIKey == "") {
 			alert("Please enter a valid API Key");
@@ -376,6 +388,7 @@ var EmoUI = React.createClass({
 			}
 		});
 	},
+	//functions that handle changes to the state
 	handleTableChange: function(table) {
 		this.setState({
 			currentTableValue: table
