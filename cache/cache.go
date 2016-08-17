@@ -1,3 +1,4 @@
+// functions and variables used for caching tables search 
 package cache
 
 import (

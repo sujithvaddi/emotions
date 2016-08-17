@@ -1,11 +1,11 @@
+//datastore page
+
+//npm packages installed, bundled with browserify
 var React = require('react');
 var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
-var JQuery = require('jquery');
-var Bootstrap = require('bootstrap');
-//var BootstrapDialog = require('bootstrap3-dialog');
 
-
+//button names and hovertext for constant delta buttons
 var deltaButtons = [
 	{"name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}"},
 	{"name": "Literal", "title": "create a literal delta e.g. {\"author\":\"Bob\"}"},

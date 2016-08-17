@@ -1,3 +1,4 @@
+// useful functions for checking and debugging 
 package basics
 
 import (
