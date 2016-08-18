@@ -1,7 +1,6 @@
 package deltas
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	
@@ -65,11 +64,8 @@ func splitIntoKeyValue(delta string) (deltaMap map[string]string) {
     rInsideQuotes, _ := regexp.Compile("\".+\"")
     key := rInsideQuotes.FindString(keyHalf)
 
-    fmt.Println(key)
-    fmt.Println(valueHalf)
-
     deltaMap["key"] = key[1:len(key)-1]
-    deltaMap["value"] = valueHalf[1:len(valueHalf)-1]
+    deltaMap["value"] = valueHalf[2:len(valueHalf)-2]
     return 
 	
 }

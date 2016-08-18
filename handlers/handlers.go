@@ -140,6 +140,7 @@ func SubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 
 		encoded, err := json.Marshal(info)
 		basics.Check(err)
+		w.Header().Set("Content-Type", "application/json")
 		w.Write(encoded)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method from SubscriptionHandler: %s", r.Method), http.StatusMethodNotAllowed)
@@ -159,6 +160,7 @@ func SearchCoordinateHandler(w http.ResponseWriter, r *http.Request) {
 		basics.Check(err)
 		defer resp.Body.Close()
 
+		w.Header().Set("Content-Type", "application/json")
 		io.Copy(w, resp.Body)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method from SearchCoordinateHandler: %s", r.Method), http.StatusMethodNotAllowed)
@@ -251,6 +253,7 @@ func DeltaConstructorHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("unknown delta type")
 		}
 
+		fmt.Println(deltaString)
 		w.Header().Set("Content-Type", "text/plain")
 		io.Copy(w, strings.NewReader(deltaString))
 	default:
@@ -281,6 +284,7 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 		basics.Check(err)
 		defer resp.Body.Close()
 
+		w.Header().Set("Content-Type", "application/json")
 		io.Copy(w, resp.Body)
 	default:
 		http.Error(w, fmt.Sprintf("Unsupported method from ReviewsHandler: %s", r.Method), http.StatusMethodNotAllowed)

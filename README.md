@@ -36,7 +36,7 @@ $ flynn -a qa-us-east-1 env set GODEBUG=netdns=cgo
 
 If updating an instance that's already running, the variable should already be set.
 
-Flynn deployments have a tendency to fail the first couple of times, sometimes with a generic fail message (ERROR: Initial web job failed to start). Try 2-3 times, wait an hour in between, try again, wait a day, try again (this has sometimes worked in the past). 
+Flynn deployments have a tendency to fail, so if it fails the first couple of times, sometimes with a generic fail message (ERROR: Initial web job failed to start). Try 2-3 times, wait an hour in between, try again, wait a day, try again (this has sometimes worked in the past). 
 
 Flynn takes print statements and logs them. Logs can be viewed with one of:
 
@@ -51,21 +51,29 @@ Procfile's web command is what flynn will run to start the service.
 ```
 web: [binary file] $PORT
 ```
-The binary file name is the compiled file in $GOPATH/bin. It should be the name of the folder the project is in. 
+The binary file name is the compiled file in $GOPATH/bin. It should be the name of the folder the project is in, currently EMOtions. 
 
 
 ##Tools 
 [Go](https://golang.org/doc/install): Server 
+
 [Godep](https://github.com/tools/godep): Golang dependency management tool. EMOtions relies on go-patricia (radix trie) for search and gocron for cron jobs. 
+
 [npm](https://docs.npmjs.com/cli/install): Javascript package management tool
+
 [Browserify](http://browserify.org/): Front-end dependency management tool. Enables 'requires' statements for importing dependencies.
+
 [React](https://facebook.github.io/react/)
+
 [React developer tool](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi): React inspector tool. Useful for current state, props, and other react specific parameters that the regular browser inspector can't detect. 
+
+[jQuery.selection](http://madapaja.github.io/jquery.selection/): highlight text to replace, used for conditionals 
+
 jQuery
 
 
 ##Client 
-All client side code is in the public folder.
+All client side code is in the public folder. Client was built using React, JS, JSX, jQuery, HTML5 and CSS. 
 
 ###Building bundle.js
 
@@ -91,9 +99,9 @@ Dependencies are located in the package.json file.
 ###React Notes
 React component inner function sometimes require binding or passing in 'this' parameter to use defined functions, props and state. For example, ajax calls require binding 'this' for success calls, and any calls to map requires 'this' to be passed in as a second parameter. 
 
-React components are ALWAYS required to be closed with a '/', including native html elements '<br>', which needs to be corrected to '<br/>'. 
+React components are ALWAYS required to be closed with a '/', including native html elements e.g. `<br>`, which needs to be corrected to `<br/>`. 
 
-The EmoUI component passes a lot of functions down so child nodes can change state that are eventually rendered by other child nodes. This would've been much better managed with a Flux implementation such as [Redux](https://github.com/reactjs/redux).
+The EmoUI component passes a lot of functions down so child nodes can change state that are eventually rendered by other child nodes. This would've been better managed with a Flux implementation such as [Redux](https://github.com/reactjs/redux).
 
 
 ##Server
@@ -104,7 +112,13 @@ Cert URLs used are in cache/cache.go file, which should be edited for deployment
 ###Go Notes
 Go json unmarshals will sometimes return empty structs if the annotations has a space after the colon ":" e.g. `json: "queue"` will sometimes break.
 
-Unbuffered channels pause the program until they're emptied. When a buffered channel is full it will also pause the program.
+Unbuffered channels pause their go routine until they're emptied. When a buffered channel is full it will also pause the routine.
+
+Setting headers:
+```
+w.Header().Set("Content-Type", "application/json")
+```
+lets the client know it's a json. If headers are not set, data will be received as a string (which can be parsed into a json with JSON.parse). 
 
 
 ##Credits

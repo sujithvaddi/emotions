@@ -1216,7 +1216,6 @@ var DeltaButton = React.createClass({
 			postData["value"] = text;
 		}
 		var json_data = JSON.stringify(postData);
-		console.log(json_data);
 		$.ajax({
 			type: 'POST',
 			url: '/deltaconstructor',
@@ -1298,7 +1297,7 @@ const TablesSearchBar = React.createClass({
 			url: '/reviews',
 			data: { tableName: input },
 			success: function (docs) {
-				this.props.updateDocs(JSON.parse(docs));
+				this.props.updateDocs(docs);
 			}.bind(this),
 			error: function (error) {
 				alert('error with getting docs!');
@@ -1450,7 +1449,6 @@ var EmoUI = React.createClass({
 			url: "/reviews",
 			data: json,
 			success: function (data) {
-				console.log(data);
 				$('#original-delta').empty();
 				$('#test-delta-result').empty();
 				if (data == "{\"success\":true}") {
@@ -1475,7 +1473,7 @@ var EmoUI = React.createClass({
 			url: "/searchcoordinate",
 			data: json,
 			success: function (data) {
-				this.handleDocumentListChange([JSON.parse(data)]);
+				this.handleDocumentListChange([data]);
 			}.bind(this),
 			error: function (err) {
 				alert(err);
@@ -1595,6 +1593,7 @@ var EmoUI = React.createClass({
 							),
 							React.createElement('br', null),
 							React.createElement('textarea', {
+								id: 'edit-value',
 								className: 'edit-value',
 								type: 'text',
 								placeholder: 'once you select a table and a document, delta buttons will appear on the right',

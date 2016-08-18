@@ -29,7 +29,7 @@ var TableCache *patricia.Trie
 func DecryptKey() {
 	key := "EMOtions08152016" 
 
-    block,err := aes.NewCipher([]byte(key))
+    block, err := aes.NewCipher([]byte(key))
     basics.Check(err)
     ciphertext := []byte("abcdef1234567890") 
     iv := ciphertext[:aes.BlockSize] 
