@@ -6,7 +6,7 @@ var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
 
 //button names and hovertext for constant delta buttons
-var deltaButtons = [
+var DELTA_BUTTONS = [
 	{"name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}"},
 	{"name": "Literal", "title": "create a literal delta e.g. {\"author\":\"Bob\"}"},
 	{"name": "Delete Document", "title": "delete the whole document"},
@@ -14,7 +14,7 @@ var deltaButtons = [
 	{"name": "Nest", "title": "nests a delta e.g. "}
 ]
 
-var condtionalButtons = [
+var CONDITIONAL_BUTTONS = [
 	{"name": "Make Conditional", "title": "makes delta conditional e.g {..,\"author\":\"Bob\"} -> if [insert condition delta] then {..,\"author\":\"Bob\"} end"},
 	{"name": "Noop", "title": "delta that does nothing. if [insert condition delta] then <b>{..,\"author\":\"Bob\"}</b> end -> if [insert condition delta] then .. end." },
 	{"name": "True", "title": "replaces selected with delta true condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysTrue() then .. end"},
@@ -35,19 +35,21 @@ var GenericEditButton = React.createClass({
 			success: function(value) {
 				this.props.changeTextArea(value);
 			}.bind(this),
-			//binds of some sort are required to use 'this' object in non-top level functions (e.g. ajax calls, maps)
+			//bind is required to use 'this' in non-top level functions (e.g. ajax calls, maps)
 			error: function(err) {
 				alert("error from GenericEditButton: " + err);
 			}
 		})
 	},
 	render: function() {
-		var faceValueRendner = this.props.faceValue;
-		if (faceValueRendner.length > 25) {
-			faceValueRendner = faceValueRendner.substring(0, 25) + "...";
+		var faceValueRender = this.props.faceValue;
+		if (faceValueRender.length > 25) {
+			faceValueRender = faceValueRender.substring(0, 25) + "...";
 		};
 		return (
-			<button className="btn btn-default" onClick={this.editTextArea} >{faceValueRendner}</button>
+			<button 
+				className="btn btn-default" 
+				onClick={this.editTextArea} >{faceValueRender}</button>
 			);
 	}
 });
@@ -93,9 +95,9 @@ var EditButtons = React.createClass({
 		}
 		generateEditButtons(this.props.currentDoc, this);
 		return (<div>
-			<div> Nested JSON object keys (click to wrap current JSON): <br/>{nestedKeyButtons}</div><br/>
-			<div> Edit fields: <br/>{editButtons}</div><br/>
-			</div>
+					<div> Nested JSON object keys (click to wrap current JSON): <br/>{nestedKeyButtons}</div><br/>
+					<div> Edit fields: <br/>{editButtons}</div><br/>
+				</div>
 			);
 	}
 });
@@ -110,7 +112,10 @@ var CoordinateEditButton = React.createClass({
 	render: function() {
 		var buttonText = "EDIT: " + this.props.coordID;
 		return (
-			<button className={"btn btn-default"} type="button" onClick={this.startEditing}>{buttonText}</button>
+			<button 
+				className={"btn btn-default"} 
+				type="button" 
+				onClick={this.startEditing}>{buttonText}</button>
 			);
 	}
 });
@@ -179,8 +184,8 @@ var DeltaButton = React.createClass({
 		}
 		var json_data = JSON.stringify(postData);
 		$.ajax({
-			type: 'POST',
-			url: '/deltaconstructor',
+			type: "POST",
+			url: "/deltaconstructor",
 			data: json_data,
 			success: function(data) {
 				if (text != "") {
@@ -202,8 +207,7 @@ var DeltaButton = React.createClass({
 				type="button" 
 				data-toggle="tooltip" 
 				title={this.props.tooltipText} 
-				data-html="true"
-         		>{this.props.buttonText}</button>
+				data-html="true" >{this.props.buttonText}</button>
 			);
 	}
 });
@@ -239,7 +243,7 @@ const TablesSearchBar = React.createClass({
 				resolve(results.result);
 			},
 			error: function (error) {
-				alert ('error with getting tables search results:', error);
+				alert('error with getting tables search results:', error);
 			}
 		});
 	},
@@ -261,10 +265,10 @@ const TablesSearchBar = React.createClass({
 	},
 	render() {
 		return (
-			<SearchBar
-			placeholder="search for a table"
-			onChange={this.onChange}
-			onSubmit={this.onSubmit} />
+			<SearchBar 
+				placeholder="search for a table"
+				onChange={this.onChange}
+				onSubmit={this.onSubmit} />
 			);
 	}
 });
@@ -318,15 +322,15 @@ var EmoUI = React.createClass({
 	//sends the test delta to server, which will format and forward to emo
 	sendTestDelta: function() {
 		var delta = this.state.currentTextAreaValue;
-		var jsonStr = $("#" + $('#current-key').val()).text();
+		var jsonStr = $("#" + this.state.currentKeyValue).text();
 		var data = {
 			"delta": delta,
 			"original": jsonStr
 		};
 		var json = JSON.stringify(data)
 		$.ajax({
-			type: 'POST',
-			url: '/deltatest',
+			type: "POST",
+			url: "/deltatest",
 			data: json,
 			success: function(data) {
 				$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
@@ -358,11 +362,12 @@ var EmoUI = React.createClass({
 				$('#original-delta').empty();
 				$('#test-delta-result').empty();
 				if (data == "{\"success\":true}") {
+					this.findCoordinate();
 					alert("success making changes!");
 				} else {
 					alert("update was not successful: " + data);
 				}
-			},
+			}.bind(this),
 			error: function(err) {
 				alert("error: " + err);
 			}
@@ -422,7 +427,7 @@ var EmoUI = React.createClass({
 			userAPIKey: event.target.value
 		});
 	},
-	handleCurrenTableChange: function(event) {
+	handleCurrentTableChange: function(event) {
 		this.setState({
 			currentTableValue: event.target.value
 		});
@@ -439,11 +444,13 @@ var EmoUI = React.createClass({
 					<div className="col-md-6 left">
 						<img src="upload.jpg" width="30%" alt="Bazaarvoice"/>
 						<NavigationBar />
-					    <div><h3>API Key:</h3><input
-												value={this.state.userAPIKey}
-									            style={{width: 50 + "%"}}
-												placeholder="please enter your API key here"
-												onChange={this.handleAPIKeyChange}/></div>
+					    <div><h3>API Key:</h3>
+					    	<input
+								value={this.state.userAPIKey}
+					            style={{width: 50 + "%"}}
+								placeholder="please enter your API key here"
+								onChange={this.handleAPIKeyChange}/>
+						</div>
 						<div className="search-bar">
 							<TablesSearchBar 
 								throttle={1000} 
@@ -454,12 +461,16 @@ var EmoUI = React.createClass({
 							Current Table: <input id="current-table" 
 									            style={{width: 50 + "%"}}
 												value={this.state.currentTableValue} 
-												onChange={this.handleCurrenTableChange}/><br/>
+												onChange={this.handleCurrentTableChange}/><br/>
 							Current Key: <input id="current-key" 
 									            style={{width: 50 + "%"}}
 												value={this.state.currentKeyValue} 
 												onChange={this.handleCurrentKeyChange} />
-							<button className="btn btn-default" type="button" onClick={this.findCoordinate}>Find Document</button>
+							<button 
+								className="btn btn-default" 
+								type="button" 
+								onClick={this.findCoordinate}
+								>Find Document</button>
 						</div>
 						<div id="content5">
 						      <form><h2>Editable value:</h2><br/>
@@ -472,8 +483,18 @@ var EmoUI = React.createClass({
 							            style={{width: 300, maxHeight: 100}} 
 							            onChange={this.handleTextAreaChange} /><br/>
 						      Options:
-						            <button className="btn btn-default" id="test-result" type="button" onClick={this.sendTestDelta}>See Test Result</button>
-						            <button className="btn btn-default" id="send-delta" type="button" onClick={this.sendDelta}>Send Update</button><br/>
+						            <button 
+						            	className="btn btn-default" 
+						            	id="test-result" 
+						            	type="button" 
+						            	onClick={this.sendTestDelta}
+						            	>See Test Result</button>
+						            <button 
+						            	className="btn btn-default" 
+						            	id="send-delta" 
+						            	type="button" 
+						            	onClick={this.sendDelta}
+						            	>Send Update</button><br/>
 						      </form>
 						</div>
 		                <div id="edit-document-container">
@@ -494,8 +515,8 @@ var EmoUI = React.createClass({
 					</div>
 					<div className="col-md-3 right deltas-conditionals">
 			        	<div><ButtonColumn
-			        			deltas={deltaButtons} 
-			        			conditionals={condtionalButtons}
+			        			deltas={DELTA_BUTTONS} 
+			        			conditionals={CONDITIONAL_BUTTONS}
 								changeTextArea={this.handleButtonTextAreaChange}
 								currentTextArea={this.state.currentTextAreaValue} />
 			        	</div><br/>

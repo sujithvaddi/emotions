@@ -2,7 +2,7 @@
 
 ul.search-bar-suggestions {position: absolute; background-color: white;list-style-type: none;}
 
-textarea#edit-value.error{border: 2px solid #f00;}
+textarea.error{border: 2px solid #f00;}
 
 ul {
     list-style-type: none;

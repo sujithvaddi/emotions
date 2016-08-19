@@ -1020,9 +1020,9 @@ var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
 
 //button names and hovertext for constant delta buttons
-var deltaButtons = [{ "name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}" }, { "name": "Literal", "title": "create a literal delta e.g. {\"author\":\"Bob\"}" }, { "name": "Delete Document", "title": "delete the whole document" }, { "name": "Delete Key", "title": "delete one key-value pair" }, { "name": "Nest", "title": "nests a delta e.g. " }];
+var DELTA_BUTTONS = [{ "name": "Map", "title": "", "title": "create a conditional delta e.g.  {..,\"author\":\"Bob\"}" }, { "name": "Literal", "title": "create a literal delta e.g. {\"author\":\"Bob\"}" }, { "name": "Delete Document", "title": "delete the whole document" }, { "name": "Delete Key", "title": "delete one key-value pair" }, { "name": "Nest", "title": "nests a delta e.g. " }];
 
-var condtionalButtons = [{ "name": "Make Conditional", "title": "makes delta conditional e.g {..,\"author\":\"Bob\"} -> if [insert condition delta] then {..,\"author\":\"Bob\"} end" }, { "name": "Noop", "title": "delta that does nothing. if [insert condition delta] then <b>{..,\"author\":\"Bob\"}</b> end -> if [insert condition delta] then .. end." }, { "name": "True", "title": "replaces selected with delta true condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysTrue() then .. end" }, { "name": "False", "title": "replaces selected with delta false condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysFalse() then .. end" }];
+var CONDITIONAL_BUTTONS = [{ "name": "Make Conditional", "title": "makes delta conditional e.g {..,\"author\":\"Bob\"} -> if [insert condition delta] then {..,\"author\":\"Bob\"} end" }, { "name": "Noop", "title": "delta that does nothing. if [insert condition delta] then <b>{..,\"author\":\"Bob\"}</b> end -> if [insert condition delta] then .. end." }, { "name": "True", "title": "replaces selected with delta true condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysTrue() then .. end" }, { "name": "False", "title": "replaces selected with delta false condition e.g. if <b>[insert condition delta]</b> then .. end -> if alwaysFalse() then .. end" }];
 
 //edit button for a key-value pair in the json document
 var GenericEditButton = React.createClass({
@@ -1040,21 +1040,23 @@ var GenericEditButton = React.createClass({
 			success: function (value) {
 				this.props.changeTextArea(value);
 			}.bind(this),
-			//binds of some sort are required to use 'this' object in non-top level functions (e.g. ajax calls, maps)
+			//bind is required to use 'this' in non-top level functions (e.g. ajax calls, maps)
 			error: function (err) {
 				alert("error from GenericEditButton: " + err);
 			}
 		});
 	},
 	render: function () {
-		var faceValueRendner = this.props.faceValue;
-		if (faceValueRendner.length > 25) {
-			faceValueRendner = faceValueRendner.substring(0, 25) + "...";
+		var faceValueRender = this.props.faceValue;
+		if (faceValueRender.length > 25) {
+			faceValueRender = faceValueRender.substring(0, 25) + "...";
 		};
 		return React.createElement(
 			'button',
-			{ className: 'btn btn-default', onClick: this.editTextArea },
-			faceValueRendner
+			{
+				className: 'btn btn-default',
+				onClick: this.editTextArea },
+			faceValueRender
 		);
 	}
 });
@@ -1135,7 +1137,10 @@ var CoordinateEditButton = React.createClass({
 		var buttonText = "EDIT: " + this.props.coordID;
 		return React.createElement(
 			'button',
-			{ className: "btn btn-default", type: 'button', onClick: this.startEditing },
+			{
+				className: "btn btn-default",
+				type: 'button',
+				onClick: this.startEditing },
 			buttonText
 		);
 	}
@@ -1217,8 +1222,8 @@ var DeltaButton = React.createClass({
 		}
 		var json_data = JSON.stringify(postData);
 		$.ajax({
-			type: 'POST',
-			url: '/deltaconstructor',
+			type: "POST",
+			url: "/deltaconstructor",
 			data: json_data,
 			success: function (data) {
 				if (text != "") {
@@ -1241,8 +1246,7 @@ var DeltaButton = React.createClass({
 				type: 'button',
 				'data-toggle': 'tooltip',
 				title: this.props.tooltipText,
-				'data-html': 'true'
-			},
+				'data-html': 'true' },
 			this.props.buttonText
 		);
 	}
@@ -1412,15 +1416,15 @@ var EmoUI = React.createClass({
 	//sends the test delta to server, which will format and forward to emo
 	sendTestDelta: function () {
 		var delta = this.state.currentTextAreaValue;
-		var jsonStr = $("#" + $('#current-key').val()).text();
+		var jsonStr = $("#" + this.state.currentKeyValue).text();
 		var data = {
 			"delta": delta,
 			"original": jsonStr
 		};
 		var json = JSON.stringify(data);
 		$.ajax({
-			type: 'POST',
-			url: '/deltatest',
+			type: "POST",
+			url: "/deltatest",
 			data: json,
 			success: function (data) {
 				$('#original-delta').empty().append('<pre><code>' + jsonStr + '</code></pre>');
@@ -1452,11 +1456,12 @@ var EmoUI = React.createClass({
 				$('#original-delta').empty();
 				$('#test-delta-result').empty();
 				if (data == "{\"success\":true}") {
+					this.findCoordinate();
 					alert("success making changes!");
 				} else {
 					alert("update was not successful: " + data);
 				}
-			},
+			}.bind(this),
 			error: function (err) {
 				alert("error: " + err);
 			}
@@ -1516,7 +1521,7 @@ var EmoUI = React.createClass({
 			userAPIKey: event.target.value
 		});
 	},
-	handleCurrenTableChange: function (event) {
+	handleCurrentTableChange: function (event) {
 		this.setState({
 			currentTableValue: event.target.value
 		});
@@ -1567,7 +1572,7 @@ var EmoUI = React.createClass({
 						React.createElement('input', { id: 'current-table',
 							style: { width: 50 + "%" },
 							value: this.state.currentTableValue,
-							onChange: this.handleCurrenTableChange }),
+							onChange: this.handleCurrentTableChange }),
 						React.createElement('br', null),
 						'Current Key: ',
 						React.createElement('input', { id: 'current-key',
@@ -1576,7 +1581,11 @@ var EmoUI = React.createClass({
 							onChange: this.handleCurrentKeyChange }),
 						React.createElement(
 							'button',
-							{ className: 'btn btn-default', type: 'button', onClick: this.findCoordinate },
+							{
+								className: 'btn btn-default',
+								type: 'button',
+								onClick: this.findCoordinate
+							},
 							'Find Document'
 						)
 					),
@@ -1604,12 +1613,22 @@ var EmoUI = React.createClass({
 							'Options:',
 							React.createElement(
 								'button',
-								{ className: 'btn btn-default', id: 'test-result', type: 'button', onClick: this.sendTestDelta },
+								{
+									className: 'btn btn-default',
+									id: 'test-result',
+									type: 'button',
+									onClick: this.sendTestDelta
+								},
 								'See Test Result'
 							),
 							React.createElement(
 								'button',
-								{ className: 'btn btn-default', id: 'send-delta', type: 'button', onClick: this.sendDelta },
+								{
+									className: 'btn btn-default',
+									id: 'send-delta',
+									type: 'button',
+									onClick: this.sendDelta
+								},
 								'Send Update'
 							),
 							React.createElement('br', null)
@@ -1652,8 +1671,8 @@ var EmoUI = React.createClass({
 						'div',
 						null,
 						React.createElement(ButtonColumn, {
-							deltas: deltaButtons,
-							conditionals: condtionalButtons,
+							deltas: DELTA_BUTTONS,
+							conditionals: CONDITIONAL_BUTTONS,
 							changeTextArea: this.handleButtonTextAreaChange,
 							currentTextArea: this.state.currentTextAreaValue })
 					),

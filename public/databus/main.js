@@ -1,9 +1,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
-//var JQuery = require('jquery');
-//var Bootstrap = require('bootstrap');
-//var BootstrapDialog = require('bootstrap3-dialog');
 
 const SubscriptionInfo = React.createClass({
 	render: function() {
@@ -41,6 +38,7 @@ var PeekList = React.createClass({
 		return (<div>{peeks}</div>);
 	}
 });
+
 
 var NavigationBar = React.createClass({
 	render: function() {
@@ -111,12 +109,17 @@ var EmoUI = React.createClass({
 						<NavigationBar />
 					    <div><h2>Databus</h2></div>
 						<div id="current-stuff">
-							Current subscription: <input id="current-key" 
-									            style={{width: 50 + "%"}}
-									            placeholder="enter your subscription here"
-												value={this.state.currentSubscriptionValue} 
-												onChange={this.handleSubscriptionUpdate} />
-							<button className="btn btn-default" type="button" onClick={this.findSubscription}>Find Subscription</button>
+							Current subscription: 
+							<input id="current-key" 
+					            style={{width: 50 + "%"}}
+					            placeholder="enter your subscription here"
+								value={this.state.currentSubscriptionValue} 
+								onChange={this.handleSubscriptionUpdate} />
+							<button 
+								className="btn btn-default" 
+								type="button" 
+								onClick={this.findSubscription}
+								>Find Subscription</button>
 						</div>
 		                <div><h2>Peek</h2></div>
 						<div>
@@ -125,7 +128,8 @@ var EmoUI = React.createClass({
 					</div>
 					<div className="col-md-3 right deltas-conditionals">
 						<h2>Subscription Info</h2>
-			        	<SubscriptionInfo data={this.state.currentSubscriptionInfo} />
+			        	<SubscriptionInfo 
+			        		data={this.state.currentSubscriptionInfo} />
 			        </div>  
 				</div>
 			</div>

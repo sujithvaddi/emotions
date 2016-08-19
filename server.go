@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	
+
 	"github.com/EMOtions/cache"
 	"github.com/EMOtions/handlers"
 )
@@ -36,7 +36,8 @@ func main() {
 	http.HandleFunc("/queueinfo", handlers.QueueHandler)
 	http.HandleFunc("/queuemessage", handlers.QueueMessageHandler)
 
-	//serving pages
+	//serving pages, based on structure of index.html files in their respective folders
+	//in the public folder 
 	http.Handle("/", http.FileServer(http.Dir("./public")))
 	http.Handle("/databus", http.StripPrefix("/databus", http.FileServer(http.Dir("./public/databus"))))
 	http.Handle("/queue", http.StripPrefix("/queue", http.FileServer(http.Dir("./public/queue"))))

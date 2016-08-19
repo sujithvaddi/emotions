@@ -1015,9 +1015,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
-//var JQuery = require('jquery');
-//var Bootstrap = require('bootstrap');
-//var BootstrapDialog = require('bootstrap3-dialog');
 
 const SubscriptionInfo = React.createClass({
 	displayName: 'SubscriptionInfo',
@@ -1218,7 +1215,7 @@ var EmoUI = React.createClass({
 					React.createElement(
 						'div',
 						{ id: 'current-stuff' },
-						'Current subscription: ',
+						'Current subscription:',
 						React.createElement('input', { id: 'current-key',
 							style: { width: 50 + "%" },
 							placeholder: 'enter your subscription here',
@@ -1226,7 +1223,11 @@ var EmoUI = React.createClass({
 							onChange: this.handleSubscriptionUpdate }),
 						React.createElement(
 							'button',
-							{ className: 'btn btn-default', type: 'button', onClick: this.findSubscription },
+							{
+								className: 'btn btn-default',
+								type: 'button',
+								onClick: this.findSubscription
+							},
 							'Find Subscription'
 						)
 					),
@@ -1253,7 +1254,8 @@ var EmoUI = React.createClass({
 						null,
 						'Subscription Info'
 					),
-					React.createElement(SubscriptionInfo, { data: this.state.currentSubscriptionInfo })
+					React.createElement(SubscriptionInfo, {
+						data: this.state.currentSubscriptionInfo })
 				)
 			)
 		);

@@ -15,7 +15,7 @@ Deployed:
 $ go get github.com/tools/godep
 $ godep get 
 ```
-3. Run the server in the root directory:
+3. Compile and run the server in the root directory:
 ```
 $ go run server.go local
 ```
@@ -87,10 +87,10 @@ This will update the bundle[n].js file, which index.html sources.
 
 To install Browserify:
 ```
-npm install -g browserify
+$ npm install -g browserify
 ```
 
-Pages are slow to load because all the code renders on client side, server side rendering would speed up page load. 
+Pages are slow to load because the javascript renders on client side, server side rendering would speed up page load. 
 
 React-search-bar is not the default src from github as that version did not have search on enter functionality. If this dependency is updated, the functionality might break. 
 

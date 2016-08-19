@@ -177,8 +177,8 @@ func ButtonsHandler(w http.ResponseWriter, r *http.Request) {
 		
 		switch buttonType {
 		case "edit":
-			key_val := strings.Split(buttonText, ":")
-			key, val := key_val[0], key_val[1]
+			splits := strings.Split(buttonText, ":")
+			key, val := splits[0], strings.Join(splits[1:], ":")
 			val = deltas.AddQuotes(val)
 			response := "{..,\"" + key + "\":" + val + "}"
 
@@ -250,10 +250,9 @@ func DeltaConstructorHandler(w http.ResponseWriter, r *http.Request) {
 		case "False":
 			deltaString = deltas.AlwaysFalse(data)
 		default:
-			fmt.Println("unknown delta type")
+			fmt.Println("unknown delta type error")
 		}
 
-		fmt.Println(deltaString)
 		w.Header().Set("Content-Type", "text/plain")
 		io.Copy(w, strings.NewReader(deltaString))
 	default:
@@ -272,7 +271,6 @@ func ReviewsHandler(w http.ResponseWriter, r *http.Request)  {
 
 		//writes to emodb, should be conditional, or maybe move other stuff to outside of ReviewsHandler
 		details := "/sor/1/" + edit.Table + "/" + edit.TableKey + "?audit=comment:'edit',host:aws-cms-01" + "&APIKey=" + edit.APIKey
-		fmt.Println("details: " + details)
 		resp, err := http.Post(cache.URL + details, "application/x.json-delta", strings.NewReader(edit.Delta))
 		basics.Check(err)
 		defer resp.Body.Close()

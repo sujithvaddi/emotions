@@ -21616,9 +21616,6 @@ module.exports = require('./lib/React');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
-//var JQuery = require('jquery');
-//var Bootstrap = require('bootstrap');
-//var BootstrapDialog = require('bootstrap3-dialog');
 
 const SubscriptionInfo = React.createClass({
 	displayName: 'SubscriptionInfo',
@@ -21727,7 +21724,8 @@ var MessageList = React.createClass({
 
 	render: function () {
 		var messages = this.props.data.map(function (message, index) {
-			return React.createElement(Message, { handleMessagesChanges: this.props.handleMessagesChanges,
+			return React.createElement(Message, {
+				handleMessagesChanges: this.props.handleMessagesChanges,
 				message: message,
 				index: index,
 				key: index });
@@ -21902,14 +21900,19 @@ var EmoUI = React.createClass({
 						'div',
 						{ id: 'current-stuff' },
 						'Current queue: ',
-						React.createElement('input', { id: 'current-key',
+						React.createElement('input', {
+							id: 'current-key',
 							style: { width: 50 + "%" },
 							placeholder: 'enter queue name',
 							value: this.state.currentQueueValue,
 							onChange: this.handleQueueUpdate }),
 						React.createElement(
 							'button',
-							{ className: 'btn btn-default', type: 'button', onClick: this.findQueue },
+							{
+								className: 'btn btn-default',
+								type: 'button',
+								onClick: this.findQueue
+							},
 							'Find Subscription'
 						)
 					),
@@ -21925,17 +21928,26 @@ var EmoUI = React.createClass({
 								'Message:'
 							),
 							React.createElement('br', null),
-							React.createElement(MessageList, { data: this.state.currentMessages,
+							React.createElement(MessageList, {
+								data: this.state.currentMessages,
 								handleMessagesChanges: this.handleMessagesChanges }),
 							'Options:',
 							React.createElement(
 								'button',
-								{ className: 'btn btn-default', type: 'button', onClick: this.sendMessages },
+								{
+									className: 'btn btn-default',
+									type: 'button',
+									onClick: this.sendMessages
+								},
 								'Send Messages'
 							),
 							React.createElement(
 								'button',
-								{ className: 'btn btn-default', type: 'button', onClick: this.addMessage },
+								{
+									className: 'btn btn-default',
+									type: 'button',
+									onClick: this.addMessage
+								},
 								'Add Another Message'
 							),
 							React.createElement('br', null)

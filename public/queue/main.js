@@ -1,9 +1,6 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var SearchBar = require('react-search-bar');
-//var JQuery = require('jquery');
-//var Bootstrap = require('bootstrap');
-//var BootstrapDialog = require('bootstrap3-dialog');
 
 const SubscriptionInfo = React.createClass({
 	render: function() {
@@ -77,12 +74,14 @@ var Message = React.createClass({
 	}
 });
 
+
 var MessageList = React.createClass({
 	render: function() {
 		var messages = this.props.data.map(
 			function(message, index) {
 				return (
-					<Message handleMessagesChanges={this.props.handleMessagesChanges}
+					<Message 
+						handleMessagesChanges={this.props.handleMessagesChanges}
 	            		message={message}
 	            		index={index}
 	            		key={index} />
@@ -94,6 +93,7 @@ var MessageList = React.createClass({
 			);
 	}
 });
+
 
 var NavigationBar = React.createClass({
 	render: function() {
@@ -205,20 +205,34 @@ var EmoUI = React.createClass({
 						<NavigationBar />
 					    <div><h2>Queue</h2></div>
 						<div id="current-stuff">
-							Current queue: <input id="current-key" 
+							Current queue: <input 
+												id="current-key" 
 									            style={{width: 50 + "%"}}
 									            placeholder="enter queue name"
 												value={this.state.currentQueueValue} 
 												onChange={this.handleQueueUpdate} />
-							<button className="btn btn-default" type="button" onClick={this.findQueue}>Find Subscription</button>
+							<button 
+								className="btn btn-default" 
+								type="button" 
+								onClick={this.findQueue}
+								>Find Subscription</button>
 						</div>
 						<div id="content5">
 						      <form><h2>Message:</h2><br/>
-						            <MessageList data={this.state.currentMessages}
-						            			handleMessagesChanges={this.handleMessagesChanges} />
+						            <MessageList 
+						            	data={this.state.currentMessages}
+						            	handleMessagesChanges={this.handleMessagesChanges} />
 						      Options:
-						            <button className="btn btn-default" type="button" onClick={this.sendMessages}>Send Messages</button>
-						            <button className="btn btn-default" type="button" onClick={this.addMessage}>Add Another Message</button><br/>
+						            <button 
+						            	className="btn btn-default" 
+						            	type="button" 
+						            	onClick={this.sendMessages}
+						            	>Send Messages</button>
+						            <button 
+						            className="btn btn-default" 
+						            type="button" 
+						            onClick={this.addMessage}
+						            >Add Another Message</button><br/>
 						      </form>
 						</div>
 		                <div><h2>Peek</h2></div>
